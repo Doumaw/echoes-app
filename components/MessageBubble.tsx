@@ -1,32 +1,27 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Message } from '../types/Message';
-import { theme } from '../constants/theme';
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
+import { theme } from "../constants/theme";
+import { Message } from "../types/Message";
 
 interface Props {
-  message?: Message;
-  isTyping?: boolean; // Nouvelle prop pour le mode "Points de suspension"
+  message: Message;
 }
 
-export const MessageBubble = React.memo(({ message, isTyping }: Props) => {
-  // Si c'est Julie (ou l'inconnu), isUser est 0.
-  const isUser = message ? message.isUser === 1 : false;
+export const MessageBubble = React.memo(({ message }: Props) => {
+  const isUser = message.isUser === 1;
 
   return (
-    <View style={[
-      styles.container,
-      isUser ? styles.userContainer : styles.julieContainer
-    ]}>
-      <View style={[
-        styles.bubble,
-        isUser ? styles.userBubble : styles.julieBubble,
-        isTyping && styles.typingBubble
-      ]}>
-        <Text style={[
-          styles.text,
-          isUser && styles.userText
-        ]}>
-          {isTyping ? "..." : message?.text}
+    <View
+      style={[
+        styles.container,
+        isUser ? styles.userContainer : styles.julieContainer,
+      ]}
+    >
+      <View
+        style={[styles.bubble, isUser ? styles.userBubble : styles.julieBubble]}
+      >
+        <Text style={[styles.text, isUser && styles.userText]}>
+          {message.text}
         </Text>
       </View>
     </View>
@@ -34,31 +29,26 @@ export const MessageBubble = React.memo(({ message, isTyping }: Props) => {
 });
 
 const styles = StyleSheet.create({
-    typingBubble: {
-    opacity: 0.6,
-    width: 50, // Bulle plus petite pour les "..."
-    alignItems: 'center',
-  },
   container: {
-    width: '100%',
+    width: "100%",
     marginVertical: theme.spacing.xs,
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   userContainer: {
-    justifyContent: 'flex-end',
-    paddingLeft: '20%',
+    justifyContent: "flex-end",
+    paddingLeft: "20%",
   },
   julieContainer: {
-    justifyContent: 'flex-start',
-    paddingRight: '20%',
+    justifyContent: "flex-start",
+    paddingRight: "20%",
   },
   bubble: {
     padding: theme.spacing.md,
     borderRadius: 18,
-    maxWidth: '100%',
+    maxWidth: "100%",
   },
   userBubble: {
-    backgroundColor: theme.colors.primary, // On utilise ton vert
+    backgroundColor: theme.colors.primary,
     borderBottomRightRadius: 4,
   },
   julieBubble: {
@@ -73,7 +63,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   userText: {
-    color: '#000000', // Noir pour contraster avec le fond vert
+    color: "#000000",
     fontWeight: theme.typography.weight.medium,
-  }
+  },
 });
