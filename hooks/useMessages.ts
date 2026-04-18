@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Message } from '../types/Message';
-import { INTRO_START_MESSAGE } from '../constants/script';
+import { INTRO_START_MESSAGE } from '../constants/intro';
 import { aiService } from '../services/aiService';
 
 export function useMessages() {
