@@ -20,6 +20,7 @@ export function useGameState() {
             hasSeenIntro: false,
             playerName: "Joueur",
             lastSeenTimestamp: Date.now(),
+            scriptIndex: 0,
           };
           setGameState(initialState);
         }
