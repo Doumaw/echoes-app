@@ -2,8 +2,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Message } from '../types/Message';
-import { INTRO_START_MESSAGE } from '../constants/intro';
 import { aiService } from '../services/aiService';
+import { GAME_STRINGS } from '../constants/game';
 
 export function useMessages() {
   const db = useSQLiteContext();
@@ -34,7 +34,7 @@ export function useMessages() {
 
   const sendFirstSOS = async (onComplete: () => void) => {
     setIsTyping(true);
-    await addMessage(INTRO_START_MESSAGE, false);
+    await addMessage(GAME_STRINGS.introStartMessage, false);
     setIsTyping(false);
     onComplete();
   };
