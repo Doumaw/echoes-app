@@ -15,7 +15,7 @@ export default function ChatScreen() {
   const { gameState, saveGameState, isLoading } = useGameState();
   const appState = useRef(AppState.currentState);
 
-  // SOS initial
+  // Premier message automatique à l'ouverture du chat (repris dans le intro.rs)
   useEffect(() => {
     if (!isLoading && gameState && !gameState.hasSeenIntro && !isTyping) {
       sendFirstSOS(() => saveGameState({ hasSeenIntro: true }));

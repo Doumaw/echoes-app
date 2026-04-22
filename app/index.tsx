@@ -25,11 +25,11 @@ export default function HomeScreen() {
           </View>
 
           <View style={styles.chatInfo}>
-            <Text style={styles.contactName}>
-              {GAME_STRINGS.defaultContactName}
+            <Text style={styles.contactName}> 
+              {GAME_STRINGS.defaultContactName} {/* TODO: Ajouter des paramètres pour personnaliser le nom */} 
             </Text>
-            <Text style={styles.lastMessage} numberOfLines={1}>
-              Vous avez un nouveau message.
+            <Text style={styles.lastMessage} numberOfLines={1}> {/* TODO mettre le dernier message de Julie OU faire en sorte que ce soit nouveau et pas un message déjà lu*/}
+              Vous avez un nouveau message. 
             </Text>
           </View>
         </Pressable>
