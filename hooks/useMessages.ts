@@ -1,9 +1,8 @@
-// hooks/useMessages.ts
-import { useState, useEffect, useCallback } from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
-import { Message } from '../types/Message';
-import { aiService } from '../services/aiService';
+import { useCallback, useEffect, useState } from 'react';
 import { GAME_STRINGS } from '../constants/game';
+import { aiService } from '../services/aiService';
+import { Message } from '../types/Message';
 
 export function useMessages() {
   const db = useSQLiteContext();

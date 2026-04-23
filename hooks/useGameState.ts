@@ -9,7 +9,6 @@ export function useGameState() {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Charger l'état au démarrage
   useEffect(() => {
     const loadState = async () => {
       try {
@@ -34,7 +33,6 @@ export function useGameState() {
     loadState();
   }, []);
 
-  // Sauvegarder l'état (Partiel pour ne mettre à jour que ce qu'on veut)
   const saveGameState = async (updates: Partial<GameState>) => {
     if (!gameState) return;
     try {
