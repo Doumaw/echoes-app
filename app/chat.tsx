@@ -1,4 +1,3 @@
-// app/chat.tsx
 import React, { useEffect, useRef } from 'react';
 import { AppState, FlatList, KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
