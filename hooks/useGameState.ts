@@ -1,3 +1,4 @@
+import { GAME_STRINGS } from "@/constants/game";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import { GameState } from "../types/GameState";
@@ -18,7 +19,7 @@ export function useGameState() {
         } else {
           const initialState: GameState = {
             hasSeenIntro: false,
-            playerName: "Joueur",
+            playerName: GAME_STRINGS.defaultContactName,
             lastSeenTimestamp: Date.now(),
             scriptIndex: 0,
           };
