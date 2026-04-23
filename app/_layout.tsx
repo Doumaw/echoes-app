@@ -9,6 +9,7 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
 
+  // TODO Faire un useEffect pour ne le faire qu'une seule fois
   const handleDbInit = async (db: any) => {
     try {
       console.log("Démarrage de la vérification SQLite...");
