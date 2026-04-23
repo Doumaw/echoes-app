@@ -1,13 +1,13 @@
 // app/chat.tsx
 import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, FlatList, KeyboardAvoidingView, Platform, Text, AppState } from 'react-native';
+import { AppState, FlatList, KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { theme } from '../constants/theme';
-import { MessageBubble } from '../components/MessageBubble';
-import { ChatInput } from '../components/ChatInput';
 import { ChatHeader } from '../components/ChatHeader';
-import { useMessages } from '../hooks/useMessages';
+import { ChatInput } from '../components/ChatInput';
+import { MessageBubble } from '../components/MessageBubble';
+import { theme } from '../constants/theme';
 import { useGameState } from '../hooks/useGameState';
+import { useMessages } from '../hooks/useMessages';
 
 export default function ChatScreen() {
   const insets = useSafeAreaInsets();
@@ -33,7 +33,7 @@ export default function ChatScreen() {
     <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <ChatHeader 
         name={gameState?.playerName || "Inconnu"} 
-        status={isTyping ? "écrit..." : "En ligne"} 
+        status="En ligne" //TODO  Mettre en place le hors ligne quand Julie est occupé, dort etc...
       />
       
       <KeyboardAvoidingView 

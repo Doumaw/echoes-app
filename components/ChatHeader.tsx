@@ -11,7 +11,7 @@ export function ChatHeader({ name, status }: Props) {
   return (
     <View style={styles.header}>
       <Text style={styles.headerTitle}>{name}</Text>
-      <Text
+      <Text // TODO A revoir pour correspondre au En ligne et Hors ligne de Julie (Plus si elle écrit ou non)
         style={[
           styles.headerStatus,
           status.includes("écrire") && { color: theme.colors.primary },
