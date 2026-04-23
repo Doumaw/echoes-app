@@ -1,6 +1,5 @@
-// services/aiService.ts
-import { Message } from '../types/Message';
 import { JULIE_PROMPT } from '../constants/prompts';
+import { Message } from '../types/Message';
 
 const API_KEY = process.env.EXPO_PUBLIC_OPENROUTER_KEY;
 const API_URL = "https://openrouter.ai/api/v1/chat/completions";
