@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { theme } from "../constants/theme";
 
+// TODO : Le nom du contact ne change pas sur l'index après modification dans les paramètres. Il faut relancer l'app... 
 export default function HomeScreen() {
   const router = useRouter();
   const { gameState } = useGameState();
@@ -11,6 +12,12 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Discussions</Text>
+        <Pressable
+          onPress={() => router.push("/settings")}
+          style={styles.settingsButton}
+        >
+          <Text style={styles.settingsIcon}>⚙️</Text>
+        </Pressable>
       </View>
 
       <View style={styles.listContainer}>
@@ -95,5 +102,14 @@ const styles = StyleSheet.create({
   lastMessage: {
     color: theme.colors.textSecondary,
     fontSize: theme.typography.size.md,
+  },
+  settingsButton: {
+    position: "absolute",
+    right: theme.spacing.md,
+    bottom: theme.spacing.md,
+    padding: 4,
+  },
+  settingsIcon: {
+    fontSize: 24,
   },
 });

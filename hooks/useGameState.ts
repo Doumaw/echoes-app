@@ -9,28 +9,29 @@ export function useGameState() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const loadState = async () => {
-      try {
-        const saved = await AsyncStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          setGameState(JSON.parse(saved));
-        } else {
-          const initialState: GameState = {
-            hasSeenIntro: false,
-            lastSeenTimestamp: Date.now(),
-            scriptIndex: 0,
-            contactName: "Numéro Inconnu",
-          };
-          setGameState(initialState);
-        }
-      } catch (e) {
-        console.error("Erreur lecture AsyncStorage", e);
-      } finally {
-        setIsLoading(false);
-      }
-    };
     loadState();
   }, []);
+
+  const loadState = async () => {
+    try {
+      const saved = await AsyncStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        setGameState(JSON.parse(saved));
+      } else {
+        const initialState: GameState = {
+          hasSeenIntro: false,
+          lastSeenTimestamp: Date.now(),
+          scriptIndex: 0,
+          contactName: "Numéro Inconnu",
+        };
+        setGameState(initialState);
+      }
+    } catch (e) {
+      console.error("Erreur lecture AsyncStorage", e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const saveGameState = async (updates: Partial<GameState>) => {
     if (!gameState) return;
@@ -43,5 +44,5 @@ export function useGameState() {
     }
   };
 
-  return { gameState, saveGameState, isLoading };
+  return { gameState, saveGameState, isLoading, loadState };
 }
