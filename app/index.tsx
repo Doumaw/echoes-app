@@ -1,10 +1,11 @@
+import { useGameState } from "@/hooks/useGameState";
 import { useRouter } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { GAME_STRINGS } from "../constants/game";
 import { theme } from "../constants/theme";
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { gameState } = useGameState();
 
   return (
     <View style={styles.container}>
@@ -25,11 +26,14 @@ export default function HomeScreen() {
           </View>
 
           <View style={styles.chatInfo}>
-            <Text style={styles.contactName}> 
-              {GAME_STRINGS.defaultContactName} {/* TODO: Ajouter des paramètres pour personnaliser le nom */} 
+            <Text style={styles.contactName}>
+              {gameState?.contactName || "Petit problème"}
+              {/* TODO: Ajouter des paramètres pour personnaliser le nom */}
             </Text>
-            <Text style={styles.lastMessage} numberOfLines={1}> {/* TODO mettre le dernier message de Julie OU faire en sorte que ce soit nouveau et pas un message déjà lu*/}
-              Vous avez un nouveau message. 
+            <Text style={styles.lastMessage} numberOfLines={1}>
+              {" "}
+              {/* TODO mettre le dernier message de Julie OU faire en sorte que ce soit nouveau et pas un message déjà lu*/}
+              Vous avez un nouveau message.
             </Text>
           </View>
         </Pressable>

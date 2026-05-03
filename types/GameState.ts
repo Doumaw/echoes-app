@@ -1,6 +1,6 @@
 export interface GameState {
   hasSeenIntro: boolean;
-  playerName: string;
   lastSeenTimestamp: number;
   scriptIndex: number;
+  contactName: string;
 }
