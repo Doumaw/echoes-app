@@ -14,8 +14,6 @@ import { theme } from "../constants/theme";
 export default function SettingsScreen() {
   const router = useRouter();
   const { gameState, saveGameState, isLoading } = useGameState();
-
-  // État local pour le champ texte (pour ne pas sauvegarder à chaque lettre)
   const [tempName, setTempName] = useState(gameState?.contactName || "");
 
   if (isLoading || !gameState) return null;
