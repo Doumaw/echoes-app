@@ -1,12 +1,13 @@
-import { JULIE_PROMPT } from '../constants/prompts';
+import { getJuliePrompt } from '@/constants/prompts';
 import { Message } from '../types/Message';
+import { GameState } from "../types/GameState";
 
 const API_KEY = process.env.EXPO_PUBLIC_OPENROUTER_KEY;
 const API_URL = "https://openrouter.ai/api/v1/chat/completions";
 const MODEL = "nvidia/nemotron-3-nano-30b-a3b:free";
 
 export const aiService = {
-  async getResponse(history: Message[]) {
+  async getResponse(history: Message[], gameState: GameState) {
     if (!API_KEY) throw new Error("API Key manquante dans le .env");
 
     const formattedHistory = [...history].reverse().map(msg => ({
@@ -25,7 +26,7 @@ export const aiService = {
       body: JSON.stringify({
         model: MODEL,
         messages: [
-          { role: 'system', content: JULIE_PROMPT },
+          { role: 'system', content: getJuliePrompt(gameState, history) },
           ...formattedHistory
         ]
       })

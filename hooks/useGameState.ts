@@ -23,6 +23,9 @@ export function useGameState() {
           lastSeenTimestamp: Date.now(),
           scriptIndex: 0,
           contactName: "Numéro Inconnu",
+          theme: 'dark',// TODO : Pas encore utilisé, a mettre en place de les paramètres de l'app
+          iaStress: 10,
+          iaTrust: 50
         };
         setGameState(initialState);
       }

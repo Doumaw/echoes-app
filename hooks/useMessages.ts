@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { GAME_STRINGS } from '../constants/game';
 import { aiService } from '../services/aiService';
 import { Message } from '../types/Message';
+import { GameState } from '@/types/GameState';
 
 export function useMessages() {
   const db = useSQLiteContext();
@@ -38,11 +39,11 @@ export function useMessages() {
     onComplete();
   };
 
-  const getAIResponse = async (history: Message[]) => {
+  const getAIResponse = async (history: Message[], gameState: GameState) => {
     if (isTyping) return;
     setIsTyping(true);
     try {
-      const response = await aiService.getResponse(history);
+      const response = await aiService.getResponse(history, gameState);
       await addMessage(response, false);
     } catch (e) {
       console.error(e);
