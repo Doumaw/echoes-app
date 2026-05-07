@@ -18,10 +18,23 @@ import { useMessages } from "../hooks/useMessages";
 
 export default function ChatScreen() {
   const insets = useSafeAreaInsets();
-  const { messages, isTyping, sendMessage, sendFirstSOS, getAIResponse } =
-    useMessages();
+  const {
+    messages,
+    isTyping,
+    sendMessage,
+    sendFirstSOS,
+    getAIResponse,
+    checkAutoProgress,
+  } = useMessages();
   const { gameState, saveGameState, isLoading } = useGameState();
   const appState = useRef(AppState.currentState);
+
+  // Avancement narratif automatique dès ouverture/montée
+  useEffect(() => {
+    if (!isLoading && gameState && saveGameState) {
+      checkAutoProgress(gameState, saveGameState);
+    }
+  }, [isLoading, gameState?.juliePhase]);
 
   // Premier message automatique à l'ouverture du chat (repris dans le intro.rs)
   useEffect(() => {
