@@ -32,7 +32,7 @@ export default function ChatScreen() {
 
   const handleSend = async (text: string) => {
     const userMsg = await sendMessage(text, true);
-    getAIResponse([userMsg, ...messages], gameState as any);
+    getAIResponse([userMsg, ...messages], gameState as any, saveGameState);
   };
 
   if (isLoading) return null;

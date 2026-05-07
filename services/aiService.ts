@@ -1,6 +1,6 @@
-import { getJuliePrompt } from '@/constants/prompts';
-import { Message } from '../types/Message';
+import { getJuliePrompt } from "@/constants/prompts";
 import { GameState } from "../types/GameState";
+import { Message } from "../types/Message";
 
 const API_KEY = process.env.EXPO_PUBLIC_OPENROUTER_KEY;
 const API_URL = "https://openrouter.ai/api/v1/chat/completions";
@@ -10,26 +10,26 @@ export const aiService = {
   async getResponse(history: Message[], gameState: GameState) {
     if (!API_KEY) throw new Error("API Key manquante dans le .env");
 
-    const formattedHistory = [...history].reverse().map(msg => ({
-      role: msg.isUser ? 'user' : 'iaBot',
-      content: msg.text
+    const formattedHistory = [...history].reverse().map((msg) => ({
+      role: msg.isUser ? "user" : "iaBot",
+      content: msg.text,
     }));
 
     const response = await fetch(API_URL, {
       method: "POST",
       headers: {
-        'Authorization': `Bearer ${API_KEY}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'http://localhost:19006',
-        'X-Title': 'Echoes Game',
+        Authorization: `Bearer ${API_KEY}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "http://localhost:19006",
+        "X-Title": "Echoes Game",
       },
       body: JSON.stringify({
         model: MODEL,
         messages: [
-          { role: 'system', content: getJuliePrompt(gameState, history) },
-          ...formattedHistory
-        ]
-      })
+          { role: "system", content: getJuliePrompt(gameState, history) },
+          ...formattedHistory,
+        ],
+      }),
     });
 
     if (!response.ok) {
@@ -38,6 +38,9 @@ export const aiService = {
     }
 
     const data = await response.json();
-    return data.choices[0]?.message?.content || "Je n'entends que du grésillement...";
-  }
+    return (
+      data.choices[0]?.message?.content ||
+      "Tu es la??? Je ne reçois aucun message..."
+    );
+  },
 };
