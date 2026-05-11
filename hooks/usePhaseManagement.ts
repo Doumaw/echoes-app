@@ -1,0 +1,203 @@
+import { useSQLiteContext } from "expo-sqlite";
+import { useCallback, useEffect, useRef } from "react";
+import { TIME_CONFIG } from "../constants/timeConfig";
+import { GameState } from "../types/GameState";
+import { Message } from "../types/Message";
+
+/**
+ * Hook pour gérer :
+ * - Les transitions de phase (awake -> asleep/busy -> awake)
+ * - Le sommeil automatique (22h-8h)
+ * - Le système de busy avec timer
+ * - Le traitement de la file d'attente des messages
+ */
+export function usePhaseManagement(
+  gameState: GameState | null,
+  saveGameState: (updates: Partial<GameState>) => Promise<void>,
+  getAllMessages: () => Promise<Message[]>,
+) {
+  const db = useSQLiteContext();
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  /**
+   * Marquer les messages de Julie comme "lus"
+   */
+  const markMessagesAsRead = useCallback(async (messageIds: string[]) => {
+    if (messageIds.length === 0) return;
+    try {
+      const placeholders = messageIds.map(() => "?").join(",");
+      await db.runAsync(
+        `UPDATE messages SET isRead = 1 WHERE id IN (${placeholders})`,
+        messageIds,
+      );
+    } catch (error) {
+      console.error("Erreur marquage messages lus", error);
+    }
+  }, [db]);
+
+  /**
+   * Obtenir l'heure actuelle du jour (heure de jeu affectée par le multiplicateur)
+   */
+  const getCurrentGameHour = useCallback((): number => {
+    const now = new Date();
+    const timeMs = now.getHours() * 60 * 60 * 1000 + now.getMinutes() * 60 * 1000;
+    return (timeMs * TIME_CONFIG.timeMultiplier) / (60 * 60 * 1000) % 24;
+  }, []);
+
+  /**
+   * Vérifier si Julie doit être endormie selon son horaire (22h-8h)
+   */
+  const shouldJulieBeAsleep = useCallback((): boolean => {
+    const currentHour = getCurrentGameHour();
+    const { startHour, endHour } = TIME_CONFIG.sleepSchedule;
+    
+    // Si startHour > endHour (ex: 22-8), c'est une plage nocturne
+    if (startHour > endHour) {
+      return currentHour >= startHour || currentHour < endHour;
+    }
+    return currentHour >= startHour && currentHour < endHour;
+  }, [getCurrentGameHour]);
+
+  /**
+   * Calculer quand Julie doit se réveiller
+   */
+  const getNextWakeUpTime = useCallback((): number => {
+    const { endHour } = TIME_CONFIG.sleepSchedule;
+    const now = new Date();
+    const wakeUpTime = new Date(now);
+    wakeUpTime.setHours(endHour, 0, 0, 0);
+
+    // Si l'heure de réveil a déjà passé aujourd'hui, c'est demain
+    if (wakeUpTime <= now) {
+      wakeUpTime.setDate(wakeUpTime.getDate() + 1);
+    }
+
+    return wakeUpTime.getTime();
+  }, []);
+
+  /**
+   * Passer Julie en mode "busy" avec durée
+   */
+  const setBusy = useCallback(
+    async (durationMinutes: number, reason?: string) => {
+      if (!gameState) return;
+      
+      const now = Date.now();
+      // Appliquer le multiplicateur de temps pour obtenir la vraie durée
+      const actualDurationMs = durationMinutes * 60 * 1000 * TIME_CONFIG.timeMultiplier;
+      const busynessUntil = now + actualDurationMs;
+
+      await saveGameState({
+        juliePhase: "busy",
+        julieBusyUntil: busynessUntil,
+        busyReason: reason,
+      });
+    },
+    [gameState, saveGameState],
+  );
+
+  /**
+   * Vérifier et mettre à jour les transitions de phase
+   */
+  const checkPhaseTransitions = useCallback(async () => {
+    if (!gameState) return;
+
+    const now = Date.now();
+    const {
+      juliePhase,
+      julieBusyUntil,
+      julieWakeUpTime,
+      firstMessageTimestamp,
+      pendingMessageIds,
+    } = gameState;
+
+    // Plot twist après 3 jours
+    if (
+      firstMessageTimestamp &&
+      now - firstMessageTimestamp > TIME_CONFIG.plotTwistAfterMs &&
+      juliePhase !== "finalTwist"
+    ) {
+      console.log("[usePhaseManagement] Plot twist triggered!");
+      await saveGameState({ juliePhase: "finalTwist" });
+      await db.runAsync(
+        `INSERT INTO messages (id, text, createdAt, isUser, isRead) VALUES (?, ?, ?, ?, ?)`,
+        [
+          Date.now().toString(),
+          "🔔 ALERTE: Le corps d'une jeune fille disparue en 2016 a été retrouvé dans une vieille mine désaffectée.",
+          Date.now(),
+          0,
+          1, // Marquer comme lu automatiquement
+        ],
+      );
+      return;
+    }
+
+    // Fin du mode busy
+    if (juliePhase === "busy" && julieBusyUntil && now >= julieBusyUntil) {
+      console.log("[usePhaseManagement] Busy ended, Julie is awake");
+      await saveGameState({
+        juliePhase: "awake",
+        julieBusyUntil: undefined,
+        busyReason: undefined,
+        pendingMessageIds: [], // Réinitialiser la file après traitement
+      });
+      return;
+    }
+
+    // Fin du sommeil
+    if (
+      juliePhase === "asleep" &&
+      julieWakeUpTime &&
+      now >= julieWakeUpTime
+    ) {
+      console.log("[usePhaseManagement] Julie woke up");
+      await saveGameState({
+        juliePhase: "awake",
+        julieWakeUpTime: undefined,
+      });
+      return;
+    }
+
+    // Endormissement automatique selon l'horaire
+    if (juliePhase === "awake" && shouldJulieBeAsleep()) {
+      console.log("[usePhaseManagement] Time to sleep (22h+)");
+      const wakeUpTime = getNextWakeUpTime();
+      await saveGameState({
+        juliePhase: "asleep",
+        julieWakeUpTime: wakeUpTime,
+      });
+      return;
+    }
+
+    // Réveil automatique selon l'horaire
+    if (juliePhase === "asleep" && !shouldJulieBeAsleep()) {
+      console.log("[usePhaseManagement] Time to wake up");
+      await saveGameState({
+        juliePhase: "awake",
+        julieWakeUpTime: undefined,
+      });
+    }
+  }, [gameState, saveGameState, shouldJulieBeAsleep, getNextWakeUpTime, db]);
+
+  /**
+   * Setup du timer pour vérifier les transitions régulièrement
+   */
+  useEffect(() => {
+    checkPhaseTransitions();
+
+    // Vérifier toutes les 10 secondes
+    timerRef.current = setInterval(checkPhaseTransitions, 10000);
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [checkPhaseTransitions]);
+
+  return {
+    setBusy,
+    markMessagesAsRead,
+    checkPhaseTransitions,
+    shouldJulieBeAsleep,
+    getCurrentGameHour,
+  };
+}

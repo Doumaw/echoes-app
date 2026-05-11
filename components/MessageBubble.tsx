@@ -7,7 +7,7 @@ interface Props {
   message: Message;
 }
 
-export const MessageBubble = React.memo(({ message }: Props) => {
+const MessageBubbleComponent = React.memo(({ message }: Props) => {
   const isUser = message.isUser === 1;
 
   return (
@@ -24,19 +24,39 @@ export const MessageBubble = React.memo(({ message }: Props) => {
           {message.text}
         </Text>
       </View>
+      
+      {/* Indicateur de lecture pour les messages de l'utilisateur */}
+      {isUser && (
+        <Text
+          style={[
+            styles.readIndicator,
+            message.isRead === 1
+              ? styles.readIndicatorRead
+              : styles.readIndicatorUnread,
+          ]}
+        >
+          {message.isRead === 1 ? "✓✓" : "✓"}
+        </Text>
+      )}
     </View>
   );
 });
+
+MessageBubbleComponent.displayName = "MessageBubble";
+
+export const MessageBubble = MessageBubbleComponent;
 
 const styles = StyleSheet.create({
   container: {
     width: "100%",
     marginVertical: theme.spacing.xs,
     flexDirection: "row",
+    alignItems: "flex-end",
   },
   userContainer: {
     justifyContent: "flex-end",
     paddingLeft: "20%",
+    gap: theme.spacing.xs,
   },
   julieContainer: {
     justifyContent: "flex-start",
@@ -65,5 +85,16 @@ const styles = StyleSheet.create({
   userText: {
     color: "#000000",
     fontWeight: theme.typography.weight.medium,
+  },
+  readIndicator: {
+    fontSize: 12,
+    fontWeight: theme.typography.weight.bold,
+    marginLeft: theme.spacing.xs,
+  },
+  readIndicatorUnread: {
+    color: theme.colors.textMuted, // Gris
+  },
+  readIndicatorRead: {
+    color: theme.colors.primary, // Couleur du thème
   },
 });

@@ -10,5 +10,8 @@ export interface GameState {
   iaTrust: number;
   juliePhase: JuliePhase;
   julieWakeUpTime?: number;
+  julieBusyUntil?: number; // Timestamp quand Julie redevient disponible
+  busyReason?: string; // Optionnel : ce que Julie est en train de faire
   firstMessageTimestamp?: number;
+  pendingMessageIds?: string[]; // IDs des messages en attente de traitement
 }

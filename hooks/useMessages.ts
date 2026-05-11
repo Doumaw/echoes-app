@@ -1,61 +1,12 @@
 import { GameState } from "@/types/GameState";
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useEffect, useState } from "react";
+import { TIME_CONFIG } from "../constants/timeConfig";
 import { GAME_STRINGS } from "../constants/game";
 import { aiService } from "../services/aiService";
 import { Message } from "../types/Message";
 
-// Script narratif super simple à modifier
-const narrativeScript = [
-  // index 0 : introduction jour 1
-  { phase: "awake", minElapsed: 0, next: 1, sleepAfter: 10 * 60 * 1000 }, // 10min awake, puis sommeil (prod: plusieurs heures)
-  // index 1 : Julie dort
-  { phase: "asleep", sleepDuration: 10 * 60 * 1000, next: 2 }, // 10min sommeil (prod: nuit)
-  // index 2 : 2e phase réveil/exploration
-  { phase: "awake", minElapsed: 1 * 60 * 60 * 1000, next: 3 }, // 1h après le réveil
-  { phase: "finalTwist", triggerAfterDays: 4 }, // after 4 days
-];
-
 export function useMessages() {
-  // Vérifie le temps réel et bascule la phase de Julie si besoin
-  const checkAutoProgress = async (
-    gameState: GameState,
-    saveGameState: (updates: Partial<GameState>) => Promise<void>,
-  ) => {
-    if (!gameState) return;
-    const now = Date.now();
-    const { juliePhase, julieWakeUpTime, scriptIndex, firstMessageTimestamp } =
-      gameState;
-
-    // Plot twist si > 4 jours depuis le début (prod: 4*24*60*60*1000)
-    if (
-      firstMessageTimestamp &&
-      now - firstMessageTimestamp > 4 * 24 * 60 * 60 * 1000 &&
-      juliePhase !== "finalTwist"
-    ) {
-      await saveGameState({ juliePhase: "finalTwist" });
-      await addMessage(
-        "🔔 INFO: Le corps d'une jeune fille disparue en 2016 a été retrouvé dans une vieille mine désaffectée.",
-        false,
-      );
-      return;
-    }
-    // Réveil/après busy
-    if (
-      (juliePhase === "asleep" || juliePhase === "busy") &&
-      julieWakeUpTime &&
-      now >= julieWakeUpTime
-    ) {
-      // Avance le script
-      await saveGameState({
-        juliePhase: "awake",
-        julieWakeUpTime: undefined,
-        scriptIndex: scriptIndex + 1,
-      });
-      await addMessage("Je suis de retour... Tu es là ?", false);
-    }
-    // (Peut ajouter plus de transitions ici si on modifie le script narratif)
-  };
   const db = useSQLiteContext();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
@@ -71,17 +22,20 @@ export function useMessages() {
     loadMessages();
   }, [loadMessages]);
 
-  // Ajoute le message et retourne sa référence (inchangé)
-  const addMessage = async (text: string, isUser: boolean) => {
+  /**
+   * Ajouter un message (utilisateur ou IA)
+   */
+  const addMessage = async (text: string, isUser: boolean, isRead: number = 1) => {
     const newMessage: Message = {
       id: Date.now().toString(),
       text,
       createdAt: Date.now(),
       isUser: isUser ? 1 : 0,
+      isRead, // Les messages IA commencent non lus (isRead = 0) si stockés en attente
     };
     await db.runAsync(
-      "INSERT INTO messages (id, text, createdAt, isUser) VALUES (?, ?, ?, ?)",
-      [newMessage.id, newMessage.text, newMessage.createdAt, newMessage.isUser],
+      "INSERT INTO messages (id, text, createdAt, isUser, isRead) VALUES (?, ?, ?, ?, ?)",
+      [newMessage.id, newMessage.text, newMessage.createdAt, newMessage.isUser, newMessage.isRead],
     );
     setMessages((prev) => [newMessage, ...prev]);
     return newMessage;
@@ -89,25 +43,29 @@ export function useMessages() {
 
   const sendFirstSOS = async (onComplete: () => void) => {
     setIsTyping(true);
-    await addMessage(GAME_STRINGS.introStartMessage, false);
+    await addMessage(GAME_STRINGS.introStartMessage, false, 1); // SOS initial est lu
     setIsTyping(false);
     onComplete();
   };
 
+  /**
+   * Obtenir la réponse de l'IA et gérer la durée de l'action
+   */
   const getAIResponse = async (
     history: Message[],
     gameState: GameState,
     saveGameState?: (updates: Partial<GameState>) => Promise<void>,
   ) => {
     if (isTyping) return;
-    // Blocage si Julie dort ou est occupée ou finalTwist
+    
     if (!gameState) return;
+    
+    // Blocage si Julie dort, est occupée ou finalTwist
     if (
       gameState.juliePhase === "asleep" ||
       gameState.juliePhase === "busy" ||
       gameState.juliePhase === "finalTwist"
     ) {
-      // Elle ne répond pas mais on inscrit quand même le message joueur via addMessage dans handleSend côté chat
       return;
     }
 
@@ -115,19 +73,19 @@ export function useMessages() {
     try {
       const response = await aiService.getResponse(history, gameState);
       try {
-        // Tentative de parsing strict JSON
-        const obj =
-          typeof response === "string" ? JSON.parse(response) : response;
-        // Sécurité : vérifier structure attendue
+        const obj = typeof response === "string" ? JSON.parse(response) : response;
+        
+        // Vérifier la structure
         if (
           typeof obj === "object" &&
           typeof obj.stress_change === "number" &&
           typeof obj.trust_change === "number" &&
           typeof obj.response === "string" &&
+          typeof obj.duration_minutes === "number" &&
           gameState &&
           saveGameState
         ) {
-          // Calcul nouveaux états bornés
+          // Calculer nouveaux états
           const newStress = Math.min(
             100,
             Math.max(0, (gameState.iaStress ?? 0) + obj.stress_change),
@@ -136,16 +94,35 @@ export function useMessages() {
             100,
             Math.max(0, (gameState.iaTrust ?? 0) + obj.trust_change),
           );
+
           await saveGameState({ iaStress: newStress, iaTrust: newTrust });
-          await addMessage(obj.response, false);
+
+          // Ajouter la réponse de Julie (marquée comme lue)
+          const newMessage = await addMessage(obj.response, false, 1);
+
+          // Si l'IA a proposé une durée, passer Julie en mode "busy"
+          if (obj.duration_minutes > 0) {
+            const now = Date.now();
+            // Appliquer le multiplicateur de temps DEV
+            const actualDurationMs =
+              obj.duration_minutes * 60 * 1000 * TIME_CONFIG.timeMultiplier;
+            const busynessUntil = now + actualDurationMs;
+
+            await saveGameState({
+              juliePhase: "busy",
+              julieBusyUntil: busynessUntil,
+              busyReason: obj.response,
+            });
+          }
         } else {
-          throw new Error("Format réponse IA inattendu");
+          throw new Error("Format réponse IA inattendu (duration_minutes manquante?)");
         }
       } catch (parseErr) {
         console.error("Erreur parsing JSON IA:", parseErr);
         await addMessage(
           "Julie a marmonné dans sa barbe... (réponse illisible)",
           false,
+          1,
         );
       }
     } catch (e) {
@@ -153,10 +130,22 @@ export function useMessages() {
       await addMessage(
         "Le signal est trop faible, je ne reçois rien...",
         false,
+        1,
       );
     } finally {
       setIsTyping(false);
     }
+  };
+
+  /**
+   * Stub pour compatibilité (la vraie logique est dans usePhaseManagement)
+   */
+  const checkAutoProgress = async (
+    gameState: GameState,
+    saveGameState: (updates: Partial<GameState>) => Promise<void>,
+  ) => {
+    // La gestion des phases est maintenant dans usePhaseManagement
+    return;
   };
 
   return {
@@ -166,5 +155,7 @@ export function useMessages() {
     sendFirstSOS,
     getAIResponse,
     checkAutoProgress,
+    loadMessages,
   };
 }
+

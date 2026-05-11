@@ -14,6 +14,7 @@ import { MessageBubble } from "../components/MessageBubble";
 import { theme } from "../constants/theme";
 import { useGameState } from "../hooks/useGameState";
 import { useMessages } from "../hooks/useMessages";
+import { usePhaseManagement } from "../hooks/usePhaseManagement";
 
 export default function ChatScreen() {
   const insets = useSafeAreaInsets();
@@ -23,30 +24,46 @@ export default function ChatScreen() {
     sendMessage,
     sendFirstSOS,
     getAIResponse,
-    checkAutoProgress,
+    loadMessages,
   } = useMessages();
   const { gameState, saveGameState, isLoading } = useGameState();
-
-  // Avancement narratif automatique dès ouverture/montée
-  useEffect(() => {
-    if (!isLoading && gameState && saveGameState) {
-      checkAutoProgress(gameState, saveGameState);
-    }
-  }, [isLoading, gameState?.juliePhase, checkAutoProgress]);
+  const { markMessagesAsRead } = usePhaseManagement(
+    gameState,
+    saveGameState,
+    loadMessages,
+  );
 
   // Premier message automatique à l'ouverture du chat (repris dans le intro.rs)
   useEffect(() => {
     if (!isLoading && gameState && !gameState.hasSeenIntro && !isTyping) {
       sendFirstSOS(() => saveGameState({ hasSeenIntro: true }));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, gameState?.hasSeenIntro]);
 
+  // Marquer les messages de Julie comme "lus" quand on accède au chat
+  useEffect(() => {
+    if (messages.length > 0) {
+      const julieMessageIds = messages
+        .filter((m) => m.isUser === 0 && m.isRead === 0)
+        .map((m) => m.id);
+      
+      if (julieMessageIds.length > 0) {
+        markMessagesAsRead(julieMessageIds);
+      }
+    }
+  }, [messages, markMessagesAsRead]);
+
   const handleSend = async (text: string) => {
-    const userMsg = await sendMessage(text, true);
+    const userMsg = await sendMessage(text, true, 1);
     getAIResponse([userMsg, ...messages], gameState as any, saveGameState);
   };
 
   if (isLoading) return null;
+
+  const isBusy =
+    gameState?.juliePhase === "busy" || gameState?.juliePhase === "asleep";
+  const isInputDisabled = isTyping || isBusy || gameState?.juliePhase === "finalTwist";
 
   return (
     <View
@@ -61,7 +78,7 @@ export default function ChatScreen() {
           gameState?.juliePhase === "asleep"
             ? "Endormie"
             : gameState?.juliePhase === "busy"
-            ? "Occupée"
+            ? `Occupée (${gameState.julieBusyUntil ? Math.ceil((gameState.julieBusyUntil - Date.now()) / 60000) : "?"}min)`
             : gameState?.juliePhase === "finalTwist"
             ? "Hors ligne"
             : isTyping
@@ -77,19 +94,30 @@ export default function ChatScreen() {
       >
         <FlatList
           data={messages}
-          keyExtractor={(m) => m.id}
+          keyExtractor={(m, i) => m.id + "_" + i}
           renderItem={({ item }) => <MessageBubble message={item} />}
           contentContainerStyle={styles.listContent}
           inverted
           ListHeaderComponent={
             isTyping ? (
               <Text style={styles.typingHint}>
-                Julie est en train d'écrire...
+                Julie est en train d&apos;écrire...
               </Text>
             ) : null
           }
         />
-        <ChatInput onSend={handleSend} disabled={isTyping} />
+
+        {isBusy && (
+          <View style={styles.busyNotification}>
+            <Text style={styles.busyText}>
+              {gameState?.juliePhase === "asleep"
+                ? "Julie est en train de dormir..."
+                : "Julie est occupée. Tes messages seront traités quand elle sera disponible."}
+            </Text>
+          </View>
+        )}
+
+        <ChatInput onSend={handleSend} disabled={isInputDisabled} />
       </KeyboardAvoidingView>
     </View>
   );
@@ -104,5 +132,20 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontStyle: "italic",
     margin: 10,
+  },
+  busyNotification: {
+    backgroundColor: theme.colors.surfaceHighlight,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+    marginHorizontal: theme.spacing.md,
+    marginBottom: theme.spacing.sm,
+    borderRadius: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: theme.colors.primary,
+  },
+  busyText: {
+    color: theme.colors.textSecondary,
+    fontSize: theme.typography.size.sm,
+    fontStyle: "italic",
   },
 });
