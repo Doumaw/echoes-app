@@ -34,7 +34,13 @@ export default function ChatScreen() {
   // Premier message automatique à l'ouverture du chat (repris dans le intro.rs)
   useEffect(() => {
     if (!isLoading && gameState && !gameState.hasSeenIntro && !isTyping) {
-      sendFirstSOS(() => saveGameState({ hasSeenIntro: true }));
+      sendFirstSOS(() => {
+        // Définir firstMessageTimestamp au premier message de Julie
+        saveGameState({ 
+          hasSeenIntro: true,
+          firstMessageTimestamp: Date.now(),
+        });
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, gameState?.hasSeenIntro]);
