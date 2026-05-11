@@ -15,6 +15,7 @@ import { theme } from "../constants/theme";
 import { useGameState } from "../hooks/useGameState";
 import { useMessages } from "../hooks/useMessages";
 import { usePhaseManagement } from "../hooks/usePhaseManagement";
+import { logGameState } from "../services/debug";
 
 export default function ChatScreen() {
   const insets = useSafeAreaInsets();
@@ -30,6 +31,18 @@ export default function ChatScreen() {
     gameState,
     saveGameState,
   );
+
+  // DEBUG: Log current state
+  useEffect(() => {
+    if (!isLoading && gameState) {
+      console.log("[ChatScreen] GameState loaded:", {
+        phase: gameState.juliePhase,
+        hasSeenIntro: gameState.hasSeenIntro,
+        firstMessageTimestamp: gameState.firstMessageTimestamp,
+      });
+      logGameState();
+    }
+  }, [isLoading, gameState]);
 
   // Premier message automatique à l'ouverture du chat (repris dans le intro.rs)
   useEffect(() => {
