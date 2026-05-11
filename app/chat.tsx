@@ -1,6 +1,5 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import {
-  AppState,
   FlatList,
   KeyboardAvoidingView,
   Platform,
@@ -27,14 +26,13 @@ export default function ChatScreen() {
     checkAutoProgress,
   } = useMessages();
   const { gameState, saveGameState, isLoading } = useGameState();
-  const appState = useRef(AppState.currentState);
 
   // Avancement narratif automatique dès ouverture/montée
   useEffect(() => {
     if (!isLoading && gameState && saveGameState) {
       checkAutoProgress(gameState, saveGameState);
     }
-  }, [isLoading, gameState?.juliePhase]);
+  }, [isLoading, gameState?.juliePhase, checkAutoProgress]);
 
   // Premier message automatique à l'ouverture du chat (repris dans le intro.rs)
   useEffect(() => {
@@ -59,7 +57,17 @@ export default function ChatScreen() {
     >
       <ChatHeader
         name={gameState?.contactName || "Petit problème"}
-        status="En ligne" //TODO  Mettre en place le hors ligne quand Julie est occupé, dort etc...
+        status={
+          gameState?.juliePhase === "asleep"
+            ? "Endormie"
+            : gameState?.juliePhase === "busy"
+            ? "Occupée"
+            : gameState?.juliePhase === "finalTwist"
+            ? "Hors ligne"
+            : isTyping
+            ? "En train d'écrire..."
+            : "En ligne"
+        }
       />
 
       <KeyboardAvoidingView

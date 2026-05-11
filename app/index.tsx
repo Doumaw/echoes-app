@@ -1,12 +1,38 @@
 import { useGameState } from "@/hooks/useGameState";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useSQLiteContext } from "expo-sqlite";
+import React, { useCallback, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { theme } from "../constants/theme";
+import { Message } from "../types/Message";
 
-// TODO : Le nom du contact ne change pas sur l'index après modification dans les paramètres. Il faut relancer l'app... 
 export default function HomeScreen() {
   const router = useRouter();
-  const { gameState } = useGameState();
+  const { gameState, loadState } = useGameState();
+  const db = useSQLiteContext();
+  const [lastMessage, setLastMessage] = useState<Message | null>(null);
+
+  // Charger le dernier message de Julie uniquement (isUser = 0)
+  const loadLastMessage = useCallback(async () => {
+    try {
+      const result = await db.getFirstAsync<Message>(
+        "SELECT * FROM messages WHERE isUser = 0 ORDER BY createdAt DESC LIMIT 1"
+      );
+      if (result) {
+        setLastMessage(result);
+      }
+    } catch (error) {
+      console.error("Erreur lecture dernier message", error);
+    }
+  }, [db]);
+
+  // Re-charger gameState et dernier message à chaque fois que l'écran gagne le focus
+  useFocusEffect(
+    useCallback(() => {
+      loadState();
+      loadLastMessage();
+    }, [loadState, loadLastMessage])
+  );
 
   return (
     <View style={styles.container}>
@@ -35,12 +61,9 @@ export default function HomeScreen() {
           <View style={styles.chatInfo}>
             <Text style={styles.contactName}>
               {gameState?.contactName || "Petit problème"}
-              {/* TODO: Ajouter des paramètres pour personnaliser le nom */}
             </Text>
             <Text style={styles.lastMessage} numberOfLines={1}>
-              {" "}
-              {/* TODO mettre le dernier message de Julie OU faire en sorte que ce soit nouveau et pas un message déjà lu*/}
-              Vous avez un nouveau message.
+              {lastMessage?.text || "Aucun message"}
             </Text>
           </View>
         </Pressable>

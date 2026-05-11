@@ -11,7 +11,7 @@ export const aiService = {
     if (!API_KEY) throw new Error("API Key manquante dans le .env");
 
     const formattedHistory = [...history].reverse().map((msg) => ({
-      role: msg.isUser ? "user" : "iaBot",
+      role: msg.isUser ? "user" : "assistant",
       content: msg.text,
     }));
 
