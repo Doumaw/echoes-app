@@ -59,9 +59,7 @@ export default function ChatScreen() {
 
   if (isLoading) return null;
 
-  const isBusy =
-    gameState?.juliePhase === "busy" || gameState?.juliePhase === "asleep";
-  const isInputDisabled = isTyping || isBusy || gameState?.juliePhase === "finalTwist";
+  const isInputDisabled = isTyping || gameState?.juliePhase === "finalTwist";
 
   return (
     <View
@@ -76,7 +74,7 @@ export default function ChatScreen() {
           gameState?.juliePhase === "asleep"
             ? "Endormie"
             : gameState?.juliePhase === "busy"
-            ? `Occupée (${gameState.julieBusyUntil ? Math.ceil((gameState.julieBusyUntil - Date.now()) / 60000) : "?"}min)`
+            ? "Occupée"
             : gameState?.juliePhase === "finalTwist"
             ? "Hors ligne"
             : isTyping
@@ -99,21 +97,11 @@ export default function ChatScreen() {
           ListHeaderComponent={
             isTyping ? (
               <Text style={styles.typingHint}>
-                Julie est en train d&apos;écrire...
+                En train d&apos;écrire...
               </Text>
             ) : null
           }
         />
-
-        {isBusy && (
-          <View style={styles.busyNotification}>
-            <Text style={styles.busyText}>
-              {gameState?.juliePhase === "asleep"
-                ? "Julie est en train de dormir..."
-                : "Julie est occupée. Tes messages seront traités quand elle sera disponible."}
-            </Text>
-          </View>
-        )}
 
         <ChatInput onSend={handleSend} disabled={isInputDisabled} />
       </KeyboardAvoidingView>
@@ -130,20 +118,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontStyle: "italic",
     margin: 10,
-  },
-  busyNotification: {
-    backgroundColor: theme.colors.surfaceHighlight,
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.sm,
-    marginHorizontal: theme.spacing.md,
-    marginBottom: theme.spacing.sm,
-    borderRadius: 8,
-    borderLeftWidth: 3,
-    borderLeftColor: theme.colors.primary,
-  },
-  busyText: {
-    color: theme.colors.textSecondary,
-    fontSize: theme.typography.size.sm,
-    fontStyle: "italic",
   },
 });
