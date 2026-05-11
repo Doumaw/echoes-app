@@ -14,7 +14,6 @@ import { Message } from "../types/Message";
 export function usePhaseManagement(
   gameState: GameState | null,
   saveGameState: (updates: Partial<GameState>) => Promise<void>,
-  getAllMessages: () => Promise<Message[]>,
 ) {
   const db = useSQLiteContext();
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -108,7 +107,6 @@ export function usePhaseManagement(
       julieBusyUntil,
       julieWakeUpTime,
       firstMessageTimestamp,
-      pendingMessageIds,
     } = gameState;
 
     // Plot twist après 3 jours
@@ -201,3 +199,4 @@ export function usePhaseManagement(
     getCurrentGameHour,
   };
 }
+

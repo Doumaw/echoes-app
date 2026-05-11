@@ -24,13 +24,11 @@ export default function ChatScreen() {
     sendMessage,
     sendFirstSOS,
     getAIResponse,
-    loadMessages,
   } = useMessages();
   const { gameState, saveGameState, isLoading } = useGameState();
   const { markMessagesAsRead } = usePhaseManagement(
     gameState,
     saveGameState,
-    loadMessages,
   );
 
   // Premier message automatique à l'ouverture du chat (repris dans le intro.rs)
