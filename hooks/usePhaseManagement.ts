@@ -159,6 +159,8 @@ export function usePhaseManagement(
     }
 
     // Sommeil automatique SEULEMENT après le premier message (hasSeenIntro = true)
+    // DÉSACTIVÉ POUR LE MVP
+    /*
     if (hasSeenIntro && juliePhase === "awake" && shouldJulieBeAsleep()) {
       console.log("[usePhaseManagement] Time to sleep (22h+)");
       const wakeUpTime = getNextWakeUpTime();
@@ -168,6 +170,7 @@ export function usePhaseManagement(
       });
       return;
     }
+    */
 
     // Réveil automatique selon l'horaire
     if (juliePhase === "asleep" && !shouldJulieBeAsleep()) {

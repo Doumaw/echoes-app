@@ -25,13 +25,13 @@ export function useMessages() {
   /**
    * Ajouter un message (utilisateur ou IA)
    */
-  const addMessage = async (text: string, isUser: boolean, isRead: number = 1) => {
+  const addMessage = async (text: string, isUser: boolean, isRead: number = isUser ? 0 : 1) => {
     const newMessage: Message = {
       id: Date.now().toString(),
       text,
       createdAt: Date.now(),
       isUser: isUser ? 1 : 0,
-      isRead, // Les messages IA commencent non lus (isRead = 0) si stockés en attente
+      isRead, // Les messages utilisateur commencent non lus (0), les messages IA sont lus (1)
     };
     await db.runAsync(
       "INSERT INTO messages (id, text, createdAt, isUser, isRead) VALUES (?, ?, ?, ?, ?)",
@@ -55,6 +55,7 @@ export function useMessages() {
     history: Message[],
     gameState: GameState,
     saveGameState?: (updates: Partial<GameState>) => Promise<void>,
+    onMessageReceived?: () => void, // Callback pour marquer les messages comme lus
   ) => {
     if (isTyping) return;
     
@@ -99,6 +100,11 @@ export function useMessages() {
 
           // Ajouter la réponse de Julie (marquée comme lue)
           const newMessage = await addMessage(obj.response, false, 1);
+
+          // Marquer les derniers messages du joueur comme "lus" (Julie les a reçus)
+          if (onMessageReceived) {
+            onMessageReceived();
+          }
 
           // Si l'IA a proposé une durée, passer Julie en mode "busy"
           if (obj.duration_minutes > 0) {

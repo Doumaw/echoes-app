@@ -72,8 +72,20 @@ export default function ChatScreen() {
   }, [messages, markMessagesAsRead]);
 
   const handleSend = async (text: string) => {
-    const userMsg = await sendMessage(text, true, 1);
-    getAIResponse([userMsg, ...messages], gameState as any, saveGameState);
+    const userMsg = await sendMessage(text, true, 0); // isRead = 0 pour non lu
+    
+    // Callback pour marquer les messages du joueur comme "lus" quand Julie répond
+    const markUserMessagesAsRead = async () => {
+      const userMessageIds = messages
+        .filter((m) => m.isUser === 1 && m.isRead === 0)
+        .map((m) => m.id);
+      
+      if (userMessageIds.length > 0) {
+        await markMessagesAsRead(userMessageIds);
+      }
+    };
+
+    getAIResponse([userMsg, ...messages], gameState as any, saveGameState, markUserMessagesAsRead);
   };
 
   if (isLoading) return null;
@@ -90,11 +102,9 @@ export default function ChatScreen() {
       <ChatHeader
         name={gameState?.contactName || "Petit problème"}
         status={
-          gameState?.juliePhase === "asleep"
-            ? "Endormie"
-            : gameState?.juliePhase === "busy"
-            ? "Occupée"
-            : gameState?.juliePhase === "finalTwist"
+          gameState?.juliePhase === "asleep" ||
+          gameState?.juliePhase === "busy" ||
+          gameState?.juliePhase === "finalTwist"
             ? "Hors ligne"
             : isTyping
             ? "En train d'écrire..."
