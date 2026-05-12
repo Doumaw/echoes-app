@@ -7,8 +7,17 @@ interface Props {
   message: Message;
 }
 
+function formatMessageTime(timestamp: number) {
+  const date = new Date(timestamp);
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+
+  return `${hours}:${minutes}`;
+}
+
 const MessageBubbleComponent = React.memo(({ message }: Props) => {
   const isUser = message.isUser === 1;
+  const timeLabel = formatMessageTime(message.createdAt);
 
   return (
     <View
@@ -23,9 +32,14 @@ const MessageBubbleComponent = React.memo(({ message }: Props) => {
         <Text style={[styles.text, isUser && styles.userText]}>
           {message.text}
         </Text>
+
+        <View style={styles.metaRow}>
+          <Text style={[styles.timestamp, isUser && styles.userTimestamp]}>
+            {timeLabel}
+          </Text>
+        </View>
       </View>
-      
-      {/* Indicateur de lecture pour les messages de l'utilisateur */}
+
       {isUser && (
         <Text
           style={[
@@ -35,7 +49,7 @@ const MessageBubbleComponent = React.memo(({ message }: Props) => {
               : styles.readIndicatorUnread,
           ]}
         >
-          {message.isRead === 1 ? "✓✓" : "✓"}
+          ✓
         </Text>
       )}
     </View>
@@ -81,10 +95,24 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
     fontSize: theme.typography.size.md,
     lineHeight: 22,
+    marginBottom: 6,
   },
   userText: {
     color: "#000000",
     fontWeight: theme.typography.weight.medium,
+  },
+  metaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: theme.spacing.xs,
+  },
+  timestamp: {
+    color: theme.colors.textMuted,
+    fontSize: 11,
+  },
+  userTimestamp: {
+    color: "rgba(0, 0, 0, 0.55)",
   },
   readIndicator: {
     fontSize: 12,
@@ -92,9 +120,9 @@ const styles = StyleSheet.create({
     marginLeft: theme.spacing.xs,
   },
   readIndicatorUnread: {
-    color: theme.colors.textMuted, // Gris
+    color: "rgba(0, 0, 0, 0.4)",
   },
   readIndicatorRead: {
-    color: theme.colors.primary, // Couleur du thème
+    color: "#0b6b5c",
   },
 });

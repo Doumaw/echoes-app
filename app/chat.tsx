@@ -12,6 +12,7 @@ import { ChatHeader } from "../components/ChatHeader";
 import { ChatInput } from "../components/ChatInput";
 import { MessageBubble } from "../components/MessageBubble";
 import { theme } from "../constants/theme";
+import { isDev } from "../constants/timeConfig";
 import { useGameState } from "../hooks/useGameState";
 import { useMessages } from "../hooks/useMessages";
 import { usePhaseManagement } from "../hooks/usePhaseManagement";
@@ -25,12 +26,12 @@ export default function ChatScreen() {
     sendMessage,
     sendFirstSOS,
     getAIResponse,
+    loadMessages,
+    markAsReadAndRefresh,
+    processPendingMessages,
   } = useMessages();
-  const { gameState, saveGameState, isLoading } = useGameState();
-  const { markMessagesAsRead } = usePhaseManagement(
-    gameState,
-    saveGameState,
-  );
+  const { gameState, saveGameState, isLoading, loadState } = useGameState();
+  const { triggerFinalTwist, resetGame } = usePhaseManagement(gameState, saveGameState);
 
   // DEBUG: Log current state
   useEffect(() => {
@@ -58,6 +59,14 @@ export default function ChatScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, gameState?.hasSeenIntro]);
 
+  // Traiter les messages en attente quand Julie redevient awake
+  useEffect(() => {
+    if (gameState?.juliePhase === "awake" && gameState?.pendingMessageIds && gameState.pendingMessageIds.length > 0) {
+      console.log(`[ChatScreen] Julie is back awake, processing ${gameState.pendingMessageIds.length} pending messages`);
+      void processPendingMessages(gameState.pendingMessageIds, gameState, saveGameState);
+    }
+  }, [gameState?.juliePhase, gameState?.pendingMessageIds, processPendingMessages, gameState, saveGameState]);
+
   // Marquer les messages de Julie comme "lus" quand on accède au chat
   useEffect(() => {
     if (messages.length > 0) {
@@ -66,26 +75,43 @@ export default function ChatScreen() {
         .map((m) => m.id);
       
       if (julieMessageIds.length > 0) {
-        markMessagesAsRead(julieMessageIds);
+        void markAsReadAndRefresh(julieMessageIds);
       }
     }
-  }, [messages, markMessagesAsRead]);
+  }, [messages, markAsReadAndRefresh]);
 
   const handleSend = async (text: string) => {
-    const userMsg = await sendMessage(text, true, 0); // isRead = 0 pour non lu
-    
-    // Callback pour marquer les messages du joueur comme "lus" quand Julie répond
-    const markUserMessagesAsRead = async () => {
-      const userMessageIds = messages
-        .filter((m) => m.isUser === 1 && m.isRead === 0)
-        .map((m) => m.id);
-      
-      if (userMessageIds.length > 0) {
-        await markMessagesAsRead(userMessageIds);
-      }
-    };
+    if (!gameState) return;
 
-    getAIResponse([userMsg, ...messages], gameState as any, saveGameState, markUserMessagesAsRead);
+    const trimmedText = text.trim();
+
+    if (isDev() && trimmedText === "##twist") {
+      await triggerFinalTwist();
+      await loadMessages();
+      return;
+    }
+
+    if (isDev() && trimmedText === "##reset") {
+      await resetGame();
+      await loadMessages();
+      await loadState();
+      return;
+    }
+
+    const userMsg = await sendMessage(text, true, 0);
+
+    // Si Julie est occupée ou endormie, ajouter le message à la queue
+    if (gameState.juliePhase === "busy" || gameState.juliePhase === "asleep") {
+      console.log(`[ChatScreen] Julie is ${gameState.juliePhase}, adding to queue`);
+      const currentPending = gameState.pendingMessageIds || [];
+      await saveGameState({
+        pendingMessageIds: [...currentPending, userMsg.id],
+      });
+      return; // Ne pas appeler l'IA maintenant
+    }
+
+    // Sinon, appeler l'IA immédiatement
+    void getAIResponse([userMsg, ...messages], gameState, saveGameState, [userMsg.id]);
   };
 
   if (isLoading) return null;
@@ -106,8 +132,6 @@ export default function ChatScreen() {
           gameState?.juliePhase === "busy" ||
           gameState?.juliePhase === "finalTwist"
             ? "Hors ligne"
-            : isTyping
-            ? "En train d'écrire..."
             : "En ligne"
         }
       />
@@ -119,7 +143,7 @@ export default function ChatScreen() {
       >
         <FlatList
           data={messages}
-          keyExtractor={(m, i) => m.id + "_" + i}
+          keyExtractor={(m) => m.id}
           renderItem={({ item }) => <MessageBubble message={item} />}
           contentContainerStyle={styles.listContent}
           inverted

@@ -4,6 +4,9 @@ import { TIME_CONFIG } from "../constants/timeConfig";
 import { GameState } from "../types/GameState";
 import { Message } from "../types/Message";
 
+const FINAL_TWIST_MESSAGE =
+  "🔔 ALERTE: Le corps d'une jeune fille disparue en 2016 a été retrouvé dans une vieille mine désaffectée.";
+
 /**
  * Hook pour gérer :
  * - Les transitions de phase (awake -> asleep/busy -> awake)
@@ -17,6 +20,41 @@ export function usePhaseManagement(
 ) {
   const db = useSQLiteContext();
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const triggerFinalTwist = useCallback(async () => {
+    await saveGameState({
+      juliePhase: "finalTwist",
+      julieBusyUntil: undefined,
+      julieWakeUpTime: undefined,
+      busyReason: undefined,
+      pendingMessageIds: [],
+    });
+
+    await db.runAsync(
+      `INSERT INTO messages (id, text, createdAt, isUser, isRead) VALUES (?, ?, ?, ?, ?)`,
+      [Date.now().toString(), FINAL_TWIST_MESSAGE, Date.now(), 0, 1],
+    );
+  }, [db, saveGameState]);
+
+  const resetGame = useCallback(async () => {
+    await db.runAsync("DELETE FROM messages");
+    await saveGameState({
+      hasSeenIntro: false,
+      lastSeenTimestamp: Date.now(),
+      scriptIndex: 0,
+      contactName: gameState?.contactName || "Numéro Inconnu",
+      theme: gameState?.theme || "dark",
+      iaStress: 10,
+      iaTrust: 50,
+      juliePhase: "awake",
+      julieSituation: "trapped",
+      julieWakeUpTime: undefined,
+      julieBusyUntil: undefined,
+      busyReason: undefined,
+      firstMessageTimestamp: undefined,
+      pendingMessageIds: [],
+    });
+  }, [db, gameState?.contactName, gameState?.theme, saveGameState]);
 
   /**
    * Marquer les messages de Julie comme "lus"
@@ -118,17 +156,7 @@ export function usePhaseManagement(
       juliePhase !== "finalTwist"
     ) {
       console.log("[usePhaseManagement] Plot twist triggered!");
-      await saveGameState({ juliePhase: "finalTwist" });
-      await db.runAsync(
-        `INSERT INTO messages (id, text, createdAt, isUser, isRead) VALUES (?, ?, ?, ?, ?)`,
-        [
-          Date.now().toString(),
-          "🔔 ALERTE: Le corps d'une jeune fille disparue en 2016 a été retrouvé dans une vieille mine désaffectée.",
-          Date.now(),
-          0,
-          1, // Marquer comme lu automatiquement
-        ],
-      );
+      await triggerFinalTwist();
       return;
     }
 
@@ -139,7 +167,6 @@ export function usePhaseManagement(
         juliePhase: "awake",
         julieBusyUntil: undefined,
         busyReason: undefined,
-        pendingMessageIds: [], // Réinitialiser la file après traitement
       });
       return;
     }
@@ -180,7 +207,7 @@ export function usePhaseManagement(
         julieWakeUpTime: undefined,
       });
     }
-  }, [gameState, saveGameState, shouldJulieBeAsleep, getNextWakeUpTime, db]);
+  }, [gameState, saveGameState, shouldJulieBeAsleep, getNextWakeUpTime, triggerFinalTwist]);
 
   /**
    * Setup du timer pour vérifier les transitions régulièrement
@@ -202,6 +229,7 @@ export function usePhaseManagement(
     checkPhaseTransitions,
     shouldJulieBeAsleep,
     getCurrentGameHour,
+    triggerFinalTwist,
+    resetGame,
   };
 }
-

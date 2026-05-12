@@ -1,5 +1,7 @@
 export type JuliePhase = "awake" | "asleep" | "busy" | "finalTwist";
 
+export type JulieSituation = "trapped" | "leg_freed" | "climbing" | "escaped";
+
 export interface GameState {
   hasSeenIntro: boolean;
   lastSeenTimestamp: number;
@@ -9,6 +11,7 @@ export interface GameState {
   iaStress: number;
   iaTrust: number;
   juliePhase: JuliePhase;
+  julieSituation: JulieSituation;
   julieWakeUpTime?: number;
   julieBusyUntil?: number; // Timestamp quand Julie redevient disponible
   busyReason?: string; // Optionnel : ce que Julie est en train de faire
