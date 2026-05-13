@@ -1,4 +1,4 @@
-import { ParsedAIResponse } from "@/types/AIResponse";
+import { ParsedAIResponse } from "@/types/ParsedAIResponse";
 
 const ALLOWED_DURATIONS = [0, 5, 10, 15, 20] as const;
 const ALLOWED_DURATION_VALUES: readonly number[] = ALLOWED_DURATIONS;

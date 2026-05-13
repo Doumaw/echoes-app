@@ -1,5 +1,5 @@
 import { getBusyDurationMs } from "@/constants/timeConfig";
-import { ParsedAIResponse } from "@/types/AIResponse";
+import { ParsedAIResponse } from "@/types/ParsedAIResponse";
 import { GameState } from "@/types/GameState";
 
 export function buildAssistantStateUpdates(

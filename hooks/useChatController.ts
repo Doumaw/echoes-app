@@ -51,6 +51,7 @@ export function useChatController() {
 
   const processPendingMessagesIfNeeded = async () => {
     if (
+      isTyping ||
       gameState?.juliePhase !== "awake" ||
       !gameState.pendingMessageIds ||
       gameState.pendingMessageIds.length === 0
@@ -105,6 +106,7 @@ export function useChatController() {
   useEffect(() => {
     void processPendingMessagesIfNeeded();
   }, [
+    isTyping,
     gameState?.juliePhase,
     gameState?.pendingMessageIds,
     processPendingMessages,
@@ -125,7 +127,7 @@ export function useChatController() {
 
     const userMessage = await sendMessage(text, true, 0);
 
-    if (shouldQueueForLater(gameState)) {
+    if (isTyping || shouldQueueForLater(gameState)) {
       const currentPending = gameState.pendingMessageIds || [];
       await saveGameState({
         pendingMessageIds: [...currentPending, userMessage.id],
@@ -148,7 +150,7 @@ export function useChatController() {
     themeMode: gameState?.theme || "dark",
     status: getChatStatus(gameState),
     contactName: gameState?.contactName || "Petit problème",
-    isInputDisabled: isTyping || gameState?.juliePhase === "finalTwist",
+    isInputDisabled: false,
     handleSend,
   };
 }

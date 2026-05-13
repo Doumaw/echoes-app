@@ -2,7 +2,7 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { SQLiteProvider } from "expo-sqlite";
 import { theme } from "@/constants/theme";
-import { migrateDbIfNeeded } from "@/services/db";
+import { migrateDbIfNeeded } from "@/services/databaseService";
 
 // On bloque l'écran d'accueil Expo au lancement
 SplashScreen.preventAutoHideAsync();
