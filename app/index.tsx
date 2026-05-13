@@ -1,5 +1,5 @@
 import { useGameState } from "@/hooks/useGameState";
-import { theme } from "@/constants/theme";
+import { AppTheme, getTheme } from "@/constants/theme";
 import { getLastAssistantMessage } from "@/services/messageRepository";
 import { Message } from "@/types/Message";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -13,12 +13,17 @@ export default function HomeScreen() {
   const db = useSQLiteContext();
   const [lastMessage, setLastMessage] = useState<Message | null>(null);
 
+  const currentTheme = getTheme(gameState?.theme || "dark");
+  const styles = getStyles(currentTheme);
+
   // Charger le dernier message de Julie uniquement (isUser = 0)
   const loadLastMessage = useCallback(async () => {
     try {
       const result = await getLastAssistantMessage(db);
       if (result) {
         setLastMessage(result);
+      } else {
+        setLastMessage(null);
       }
     } catch (error) {
       console.error("Erreur lecture dernier message", error);
@@ -49,7 +54,7 @@ export default function HomeScreen() {
         <Pressable
           style={({ pressed }) => [
             styles.chatRow,
-            pressed && { backgroundColor: theme.colors.surfaceHighlight },
+            pressed && { backgroundColor: currentTheme.colors.surfaceHighlight },
           ]}
           onPress={() => router.push("/chat")}
         >
@@ -71,7 +76,7 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: AppTheme) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,

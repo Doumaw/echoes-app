@@ -1,4 +1,5 @@
 import { useGameState } from "@/hooks/useGameState";
+import { AppTheme, getTheme } from "@/constants/theme";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -9,12 +10,14 @@ import {
     TextInput,
     View,
 } from "react-native";
-import { theme } from "@/constants/theme";
 
 export default function SettingsScreen() {
   const router = useRouter();
   const { gameState, saveGameState, isLoading } = useGameState();
   const [tempName, setTempName] = useState(gameState?.contactName || "");
+
+  const currentTheme = getTheme(gameState?.theme || "dark");
+  const styles = getStyles(currentTheme);
 
   useEffect(() => {
     if (gameState?.contactName) {
@@ -45,7 +48,7 @@ export default function SettingsScreen() {
             style={styles.input}
             value={tempName}
             onChangeText={setTempName}
-            placeholderTextColor={theme.colors.textSecondary}
+            placeholderTextColor={currentTheme.colors.textSecondary}
           />
         </View>
 
@@ -53,8 +56,11 @@ export default function SettingsScreen() {
           <View style={styles.row}>
             <Text style={styles.label}>Mode Sombre</Text>
             <Switch
-              value={true}
-              trackColor={{ false: "#767577", true: theme.colors.primary }}
+              value={gameState.theme === "dark"}
+              trackColor={{ false: "#767577", true: currentTheme.colors.primary }}
+              onValueChange={(value) => {
+                void saveGameState({ theme: value ? "dark" : "light" });
+              }}
             />
           </View>
         </View>
@@ -67,7 +73,7 @@ export default function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: AppTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
   header: {
     paddingTop: 60,

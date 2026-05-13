@@ -1,10 +1,11 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { theme } from "@/constants/theme";
+import { AppTheme } from "@/constants/theme";
 import { Message } from "@/types/Message";
 
 interface Props {
   message: Message;
+  theme: AppTheme;
 }
 
 function formatMessageTime(timestamp: number) {
@@ -15,7 +16,8 @@ function formatMessageTime(timestamp: number) {
   return `${hours}:${minutes}`;
 }
 
-const MessageBubbleComponent = React.memo(({ message }: Props) => {
+const MessageBubbleComponent = React.memo(({ message, theme }: Props) => {
+  const styles = getStyles(theme);
   const isUser = message.isUser === 1;
   const timeLabel = formatMessageTime(message.createdAt);
 
@@ -60,7 +62,7 @@ MessageBubbleComponent.displayName = "MessageBubble";
 
 export const MessageBubble = MessageBubbleComponent;
 
-const styles = StyleSheet.create({
+const getStyles = (theme: AppTheme) => StyleSheet.create({
   container: {
     width: "100%",
     marginVertical: theme.spacing.xs,
@@ -82,7 +84,7 @@ const styles = StyleSheet.create({
     maxWidth: "100%",
   },
   userBubble: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: theme.colors.bubbleUser,
     borderBottomRightRadius: 4,
   },
   julieBubble: {
@@ -98,7 +100,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   userText: {
-    color: "#000000",
+    color: theme.colors.bubbleUserText,
     fontWeight: theme.typography.weight.medium,
   },
   metaRow: {
@@ -112,7 +114,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
   userTimestamp: {
-    color: "rgba(0, 0, 0, 0.55)",
+    color: theme.colors.bubbleUserMeta,
   },
   readIndicator: {
     fontSize: 12,
@@ -120,9 +122,9 @@ const styles = StyleSheet.create({
     marginLeft: theme.spacing.xs,
   },
   readIndicatorUnread: {
-    color: "rgba(0, 0, 0, 0.4)",
+    color: theme.colors.readIndicatorUnread,
   },
   readIndicatorRead: {
-    color: "#0b6b5c",
+    color: theme.colors.readIndicatorRead,
   },
 });

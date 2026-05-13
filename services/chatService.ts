@@ -45,7 +45,7 @@ export function shouldQueueForLater(gameState: GameState) {
 
 export function getChatStatus(gameState: GameState | null) {
   if (!gameState) {
-    return "Hors ligne";
+    return "Problème de connexion";
   }
 
   if (

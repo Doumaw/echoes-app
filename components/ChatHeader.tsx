@@ -1,14 +1,17 @@
 import { router } from "expo-router";
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { theme } from "@/constants/theme";
+import { AppTheme } from "@/constants/theme";
 
 interface Props {
   name: string;
   status: string;
+  theme: AppTheme;
 }
 
-export function ChatHeader({ name, status }: Props) {
+export function ChatHeader({ name, status, theme }: Props) {
+  const styles = getStyles(theme);
+
   return (
     <View style={styles.header}>
       <Pressable onPress={() => router.back()} style={styles.backButton}>
@@ -29,7 +32,7 @@ export function ChatHeader({ name, status }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: AppTheme) => StyleSheet.create({
   header: {
     paddingHorizontal: theme.spacing.md,
     paddingVertical: theme.spacing.sm,

@@ -11,7 +11,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ChatHeader } from "@/components/ChatHeader";
 import { ChatInput } from "@/components/ChatInput";
 import { MessageBubble } from "@/components/MessageBubble";
-import { theme } from "@/constants/theme";
+import { AppTheme, getTheme } from "@/constants/theme";
 import { useChatController } from "@/hooks/useChatController";
 
 export default function ChatScreen() {
@@ -20,11 +20,15 @@ export default function ChatScreen() {
     messages,
     isTyping,
     isLoading,
+    themeMode,
     status,
     contactName,
     isInputDisabled,
     handleSend,
   } = useChatController();
+
+  const currentTheme = getTheme(themeMode);
+  const styles = getStyles(currentTheme);
 
   if (isLoading) return null;
 
@@ -35,7 +39,7 @@ export default function ChatScreen() {
         { paddingTop: insets.top, paddingBottom: insets.bottom },
       ]}
     >
-      <ChatHeader name={contactName} status={status} />
+      <ChatHeader name={contactName} status={status} theme={currentTheme} />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -45,7 +49,9 @@ export default function ChatScreen() {
         <FlatList
           data={messages}
           keyExtractor={(m) => m.id}
-          renderItem={({ item }) => <MessageBubble message={item} />}
+          renderItem={({ item }) => (
+            <MessageBubble message={item} theme={currentTheme} />
+          )}
           contentContainerStyle={styles.listContent}
           inverted
           ListHeaderComponent={
@@ -57,13 +63,17 @@ export default function ChatScreen() {
           }
         />
 
-        <ChatInput onSend={handleSend} disabled={isInputDisabled} />
+        <ChatInput
+          onSend={handleSend}
+          disabled={isInputDisabled}
+          theme={currentTheme}
+        />
       </KeyboardAvoidingView>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: AppTheme) => StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
   flex: { flex: 1 },
   listContent: { padding: theme.spacing.md },

@@ -3,7 +3,6 @@ import { useGameState } from "@/hooks/useGameState";
 import { useMessages } from "@/hooks/useMessages";
 import { usePhaseManagement } from "@/hooks/usePhaseManagement";
 import { getDevCommandAction } from "@/services/devCommandsService";
-import { logGameState } from "@/services/debug";
 import { getChatStatus, shouldQueueForLater } from "@/services/chatService";
 
 export function useChatController() {
@@ -24,68 +23,49 @@ export function useChatController() {
     saveGameState,
   );
 
-  useEffect(() => {
-    if (!isLoading && gameState) {
-      console.log("[ChatScreen] GameState loaded:", {
-        phase: gameState.juliePhase,
-        hasSeenIntro: gameState.hasSeenIntro,
-        firstMessageTimestamp: gameState.firstMessageTimestamp,
-      });
-      logGameState();
-    }
-  }, [isLoading, gameState]);
-
-  useEffect(() => {
+  const runIntroIfNeeded = async () => {
     if (gameState?.hasSeenIntro) {
       introStartedRef.current = false;
       return;
     }
 
     if (
-      !isLoading &&
-      gameState &&
-      !gameState.hasSeenIntro &&
-      !isTyping &&
-      !introStartedRef.current
+      isLoading ||
+      !gameState ||
+      isTyping ||
+      introStartedRef.current
     ) {
-      introStartedRef.current = true;
-
-      void (async () => {
-        const firstMessageTimestamp = Date.now();
-        await saveGameState({
-          hasSeenIntro: true,
-          firstMessageTimestamp,
-        });
-
-        await sendFirstSOS(() => {});
-      })();
+      return;
     }
-  }, [isLoading, gameState, isTyping, saveGameState, sendFirstSOS]);
 
-  useEffect(() => {
+    introStartedRef.current = true;
+
+    const firstMessageTimestamp = Date.now();
+    await saveGameState({
+      hasSeenIntro: true,
+      firstMessageTimestamp,
+    });
+
+    await sendFirstSOS(() => {});
+  };
+
+  const processPendingMessagesIfNeeded = async () => {
     if (
-      gameState?.juliePhase === "awake" &&
-      gameState.pendingMessageIds &&
-      gameState.pendingMessageIds.length > 0
+      gameState?.juliePhase !== "awake" ||
+      !gameState.pendingMessageIds ||
+      gameState.pendingMessageIds.length === 0
     ) {
-      console.log(
-        `[ChatScreen] Julie is back awake, processing ${gameState.pendingMessageIds.length} pending messages`,
-      );
-      void processPendingMessages(
-        gameState.pendingMessageIds,
-        gameState,
-        saveGameState,
-      );
+      return;
     }
-  }, [
-    gameState?.juliePhase,
-    gameState?.pendingMessageIds,
-    processPendingMessages,
-    gameState,
-    saveGameState,
-  ]);
 
-  useEffect(() => {
+    await processPendingMessages(
+      gameState.pendingMessageIds,
+      gameState,
+      saveGameState,
+    );
+  };
+
+  const markJulieMessagesAsReadIfNeeded = async () => {
     if (messages.length === 0) {
       return;
     }
@@ -95,24 +75,51 @@ export function useChatController() {
       .map((message) => message.id);
 
     if (julieMessageIds.length > 0) {
-      void markAsReadAndRefresh(julieMessageIds);
+      await markAsReadAndRefresh(julieMessageIds);
     }
-  }, [messages, markAsReadAndRefresh]);
+  };
 
-  const handleSend = async (text: string) => {
-    if (!gameState) return;
-
+  const handleDevCommandIfNeeded = async (text: string) => {
     const devCommandAction = getDevCommandAction(text);
+
     if (devCommandAction === "twist") {
       await triggerFinalTwist();
       await loadMessages();
-      return;
+      return true;
     }
 
     if (devCommandAction === "reset") {
       await resetGame();
       await loadMessages();
       await loadState();
+      return true;
+    }
+
+    return false;
+  };
+
+  useEffect(() => {
+    void runIntroIfNeeded();
+  }, [isLoading, gameState, isTyping, saveGameState, sendFirstSOS]);
+
+  useEffect(() => {
+    void processPendingMessagesIfNeeded();
+  }, [
+    gameState?.juliePhase,
+    gameState?.pendingMessageIds,
+    processPendingMessages,
+    gameState,
+    saveGameState,
+  ]);
+
+  useEffect(() => {
+    void markJulieMessagesAsReadIfNeeded();
+  }, [messages, markAsReadAndRefresh]);
+
+  const handleSend = async (text: string) => {
+    if (!gameState) return;
+
+    if (await handleDevCommandIfNeeded(text)) {
       return;
     }
 
@@ -138,6 +145,7 @@ export function useChatController() {
     messages,
     isTyping,
     isLoading,
+    themeMode: gameState?.theme || "dark",
     status: getChatStatus(gameState),
     contactName: gameState?.contactName || "Petit problème",
     isInputDisabled: isTyping || gameState?.juliePhase === "finalTwist",
