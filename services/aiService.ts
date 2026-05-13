@@ -1,6 +1,6 @@
 import { getJuliePrompt } from "@/constants/prompts";
-import { GameState } from "../types/GameState";
-import { Message } from "../types/Message";
+import { GameState } from "@/types/GameState";
+import { Message } from "@/types/Message";
 
 const API_KEY = process.env.EXPO_PUBLIC_OPENROUTER_KEY;
 const API_URL = "https://openrouter.ai/api/v1/chat/completions";

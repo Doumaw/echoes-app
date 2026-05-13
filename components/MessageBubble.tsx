@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { theme } from "../constants/theme";
-import { Message } from "../types/Message";
+import { theme } from "@/constants/theme";
+import { Message } from "@/types/Message";
 
 interface Props {
   message: Message;

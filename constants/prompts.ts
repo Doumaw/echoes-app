@@ -1,5 +1,5 @@
-import { GameState } from "../types/GameState";
-import { Message } from "../types/Message";
+import { GameState } from "@/types/GameState";
+import { Message } from "@/types/Message";
 
 export const getJuliePrompt = (gameState: GameState, history: Message[]) => {
   // On prend les 15 derniers messages et on les formate proprement pour l'IA

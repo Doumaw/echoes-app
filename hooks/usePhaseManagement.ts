@@ -1,11 +1,17 @@
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useEffect, useRef } from "react";
-import { TIME_CONFIG } from "../constants/timeConfig";
-import { GameState } from "../types/GameState";
-import { Message } from "../types/Message";
-
-const FINAL_TWIST_MESSAGE =
-  "🔔 ALERTE: Le corps d'une jeune fille disparue en 2016 a été retrouvé dans une vieille mine désaffectée.";
+import { getBusyDurationMs } from "@/constants/timeConfig";
+import { clearMessages, insertMessage } from "@/services/messageRepository";
+import {
+  FINAL_TWIST_MESSAGE,
+  createResetGameState,
+  getCurrentGameHour,
+  shouldJulieBeAsleep,
+  shouldTriggerFinalTwist,
+  shouldWakeFromBusy,
+  shouldWakeFromSleep,
+} from "@/services/phaseService";
+import { GameState } from "@/types/GameState";
 
 /**
  * Hook pour gérer :
@@ -30,88 +36,23 @@ export function usePhaseManagement(
       pendingMessageIds: [],
     });
 
-    await db.runAsync(
-      `INSERT INTO messages (id, text, createdAt, isUser, isRead) VALUES (?, ?, ?, ?, ?)`,
-      [Date.now().toString(), FINAL_TWIST_MESSAGE, Date.now(), 0, 1],
-    );
+    await insertMessage(db, {
+      id: Date.now().toString(),
+      text: FINAL_TWIST_MESSAGE,
+      createdAt: Date.now(),
+      isUser: 0,
+      isRead: 1,
+    });
   }, [db, saveGameState]);
 
   const resetGame = useCallback(async () => {
-    await db.runAsync("DELETE FROM messages");
-    await saveGameState({
-      hasSeenIntro: false,
-      lastSeenTimestamp: Date.now(),
-      scriptIndex: 0,
-      contactName: gameState?.contactName || "Numéro Inconnu",
-      theme: gameState?.theme || "dark",
-      iaStress: 10,
-      iaTrust: 50,
-      juliePhase: "awake",
-      julieSituation: "trapped",
-      julieWakeUpTime: undefined,
-      julieBusyUntil: undefined,
-      busyReason: undefined,
-      firstMessageTimestamp: undefined,
-      pendingMessageIds: [],
-    });
-  }, [db, gameState?.contactName, gameState?.theme, saveGameState]);
+    await clearMessages(db);
+    await saveGameState(createResetGameState(gameState));
+  }, [db, gameState, saveGameState]);
 
   /**
    * Marquer les messages de Julie comme "lus"
    */
-  const markMessagesAsRead = useCallback(async (messageIds: string[]) => {
-    if (messageIds.length === 0) return;
-    try {
-      const placeholders = messageIds.map(() => "?").join(",");
-      await db.runAsync(
-        `UPDATE messages SET isRead = 1 WHERE id IN (${placeholders})`,
-        messageIds,
-      );
-    } catch (error) {
-      console.error("Erreur marquage messages lus", error);
-    }
-  }, [db]);
-
-  /**
-   * Obtenir l'heure actuelle du jour (heure de jeu affectée par le multiplicateur)
-   */
-  const getCurrentGameHour = useCallback((): number => {
-    const now = new Date();
-    const timeMs = now.getHours() * 60 * 60 * 1000 + now.getMinutes() * 60 * 1000;
-    return (timeMs * TIME_CONFIG.timeMultiplier) / (60 * 60 * 1000) % 24;
-  }, []);
-
-  /**
-   * Vérifier si Julie doit être endormie selon son horaire (22h-8h)
-   */
-  const shouldJulieBeAsleep = useCallback((): boolean => {
-    const currentHour = getCurrentGameHour();
-    const { startHour, endHour } = TIME_CONFIG.sleepSchedule;
-    
-    // Si startHour > endHour (ex: 22-8), c'est une plage nocturne
-    if (startHour > endHour) {
-      return currentHour >= startHour || currentHour < endHour;
-    }
-    return currentHour >= startHour && currentHour < endHour;
-  }, [getCurrentGameHour]);
-
-  /**
-   * Calculer quand Julie doit se réveiller
-   */
-  const getNextWakeUpTime = useCallback((): number => {
-    const { endHour } = TIME_CONFIG.sleepSchedule;
-    const now = new Date();
-    const wakeUpTime = new Date(now);
-    wakeUpTime.setHours(endHour, 0, 0, 0);
-
-    // Si l'heure de réveil a déjà passé aujourd'hui, c'est demain
-    if (wakeUpTime <= now) {
-      wakeUpTime.setDate(wakeUpTime.getDate() + 1);
-    }
-
-    return wakeUpTime.getTime();
-  }, []);
-
   /**
    * Passer Julie en mode "busy" avec durée
    */
@@ -120,8 +61,7 @@ export function usePhaseManagement(
       if (!gameState) return;
       
       const now = Date.now();
-      // Appliquer le multiplicateur de temps pour obtenir la vraie durée
-      const actualDurationMs = durationMinutes * 60 * 1000 * TIME_CONFIG.timeMultiplier;
+      const actualDurationMs = getBusyDurationMs(durationMinutes);
       const busynessUntil = now + actualDurationMs;
 
       await saveGameState({
@@ -141,27 +81,15 @@ export function usePhaseManagement(
     if (!gameState) return;
 
     const now = Date.now();
-    const {
-      juliePhase,
-      julieBusyUntil,
-      julieWakeUpTime,
-      firstMessageTimestamp,
-      hasSeenIntro,
-    } = gameState;
+    const { juliePhase } = gameState;
 
-    // Plot twist après 3 jours
-    if (
-      firstMessageTimestamp &&
-      now - firstMessageTimestamp > TIME_CONFIG.plotTwistAfterMs &&
-      juliePhase !== "finalTwist"
-    ) {
+    if (shouldTriggerFinalTwist(gameState, now)) {
       console.log("[usePhaseManagement] Plot twist triggered!");
       await triggerFinalTwist();
       return;
     }
 
-    // Fin du mode busy
-    if (juliePhase === "busy" && julieBusyUntil && now >= julieBusyUntil) {
+    if (shouldWakeFromBusy(gameState, now)) {
       console.log("[usePhaseManagement] Busy ended, Julie is awake");
       await saveGameState({
         juliePhase: "awake",
@@ -171,12 +99,7 @@ export function usePhaseManagement(
       return;
     }
 
-    // Fin du sommeil
-    if (
-      juliePhase === "asleep" &&
-      julieWakeUpTime &&
-      now >= julieWakeUpTime
-    ) {
+    if (shouldWakeFromSleep(gameState, now)) {
       console.log("[usePhaseManagement] Julie woke up");
       await saveGameState({
         juliePhase: "awake",
@@ -207,7 +130,7 @@ export function usePhaseManagement(
         julieWakeUpTime: undefined,
       });
     }
-  }, [gameState, saveGameState, shouldJulieBeAsleep, getNextWakeUpTime, triggerFinalTwist]);
+  }, [gameState, saveGameState, triggerFinalTwist]);
 
   /**
    * Setup du timer pour vérifier les transitions régulièrement
@@ -225,7 +148,6 @@ export function usePhaseManagement(
 
   return {
     setBusy,
-    markMessagesAsRead,
     checkPhaseTransitions,
     shouldJulieBeAsleep,
     getCurrentGameHour,

@@ -1,6 +1,6 @@
 import { useGameState } from "@/hooks/useGameState";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Pressable,
     StyleSheet,
@@ -9,17 +9,23 @@ import {
     TextInput,
     View,
 } from "react-native";
-import { theme } from "../constants/theme";
+import { theme } from "@/constants/theme";
 
 export default function SettingsScreen() {
   const router = useRouter();
   const { gameState, saveGameState, isLoading } = useGameState();
   const [tempName, setTempName] = useState(gameState?.contactName || "");
 
+  useEffect(() => {
+    if (gameState?.contactName) {
+      setTempName(gameState.contactName);
+    }
+  }, [gameState?.contactName]);
+
   if (isLoading || !gameState) return null;
 
   const handleSave = async () => {
-    await saveGameState({ contactName: tempName });
+    await saveGameState({ contactName: tempName.trim() || gameState.contactName });
     router.back();
   };
 

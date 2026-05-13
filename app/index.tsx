@@ -1,10 +1,11 @@
 import { useGameState } from "@/hooks/useGameState";
+import { theme } from "@/constants/theme";
+import { getLastAssistantMessage } from "@/services/messageRepository";
+import { Message } from "@/types/Message";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import React, { useCallback, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { theme } from "../constants/theme";
-import { Message } from "../types/Message";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -15,9 +16,7 @@ export default function HomeScreen() {
   // Charger le dernier message de Julie uniquement (isUser = 0)
   const loadLastMessage = useCallback(async () => {
     try {
-      const result = await db.getFirstAsync<Message>(
-        "SELECT * FROM messages WHERE isUser = 0 ORDER BY createdAt DESC LIMIT 1"
-      );
+      const result = await getLastAssistantMessage(db);
       if (result) {
         setLastMessage(result);
       }

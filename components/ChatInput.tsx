@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import { theme } from "../constants/theme";
+import { theme } from "@/constants/theme";
 
 interface Props {
   onSend: (text: string) => void;

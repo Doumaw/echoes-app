@@ -1,0 +1,68 @@
+import { TIME_CONFIG } from "@/constants/timeConfig";
+import { GameState } from "@/types/GameState";
+import { createInitialGameState } from "@/services/gameStateService";
+
+export const FINAL_TWIST_MESSAGE =
+  "🔔 ALERTE: Le corps d'une jeune fille disparue en 2016 a été retrouvé dans une vieille mine désaffectée.";
+
+export function getCurrentGameHour() {
+  const now = new Date();
+  const timeMs =
+    now.getHours() * 60 * 60 * 1000 + now.getMinutes() * 60 * 1000;
+  return ((timeMs * TIME_CONFIG.timeMultiplier) / (60 * 60 * 1000)) % 24;
+}
+
+export function shouldJulieBeAsleep() {
+  const currentHour = getCurrentGameHour();
+  const { startHour, endHour } = TIME_CONFIG.sleepSchedule;
+
+  if (startHour > endHour) {
+    return currentHour >= startHour || currentHour < endHour;
+  }
+
+  return currentHour >= startHour && currentHour < endHour;
+}
+
+export function getNextWakeUpTime() {
+  const { endHour } = TIME_CONFIG.sleepSchedule;
+  const now = new Date();
+  const wakeUpTime = new Date(now);
+  wakeUpTime.setHours(endHour, 0, 0, 0);
+
+  if (wakeUpTime <= now) {
+    wakeUpTime.setDate(wakeUpTime.getDate() + 1);
+  }
+
+  return wakeUpTime.getTime();
+}
+
+export function shouldTriggerFinalTwist(gameState: GameState, now: number) {
+  return Boolean(
+    gameState.firstMessageTimestamp &&
+      now - gameState.firstMessageTimestamp > TIME_CONFIG.plotTwistAfterMs &&
+      gameState.juliePhase !== "finalTwist",
+  );
+}
+
+export function shouldWakeFromBusy(gameState: GameState, now: number) {
+  return Boolean(
+    gameState.juliePhase === "busy" &&
+      gameState.julieBusyUntil &&
+      now >= gameState.julieBusyUntil,
+  );
+}
+
+export function shouldWakeFromSleep(gameState: GameState, now: number) {
+  return Boolean(
+    gameState.juliePhase === "asleep" &&
+      gameState.julieWakeUpTime &&
+      now >= gameState.julieWakeUpTime,
+  );
+}
+
+export function createResetGameState(gameState: GameState | null) {
+  return createInitialGameState({
+    contactName: gameState?.contactName,
+    theme: gameState?.theme,
+  });
+}
