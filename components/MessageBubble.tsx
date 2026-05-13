@@ -46,7 +46,7 @@ const MessageBubbleComponent = React.memo(({ message, theme }: Props) => {
         <Text
           style={[
             styles.readIndicator,
-            message.isRead === 1
+            message.isIaRead === 1
               ? styles.readIndicatorRead
               : styles.readIndicatorUnread,
           ]}

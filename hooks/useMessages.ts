@@ -6,7 +6,7 @@ import { buildAssistantStateUpdates } from "@/services/chatService";
 import {
   getAllMessages,
   insertMessage,
-  markMessagesAsRead,
+  markMessagesAsIaRead,
 } from "@/services/messageRepository";
 import { Message } from "@/types/Message";
 import { useSQLiteContext } from "expo-sqlite";
@@ -23,10 +23,10 @@ export function useMessages() {
     setMessages(result);
   }, [db]);
 
-  const markAsReadAndRefresh = useCallback(async (messageIds: string[]) => {
+  const markAsIaReadAndRefresh = useCallback(async (messageIds: string[]) => {
     if (messageIds.length === 0) return;
     try {
-      await markMessagesAsRead(db, messageIds);
+      await markMessagesAsIaRead(db, messageIds);
       await loadMessages();
     } catch (error) {
       console.error("Erreur marquage messages lus", error);
@@ -37,13 +37,13 @@ export function useMessages() {
     loadMessages();
   }, [loadMessages]);
 
-  const addMessage = async (text: string, isUser: boolean, isRead: number = isUser ? 0 : 1) => {
+  const addMessage = async (text: string, isUser: boolean, isIaRead: number = isUser ? 0 : 1) => {
     const newMessage: Message = {
       id: Date.now().toString(),
       text,
       createdAt: Date.now(),
       isUser: isUser ? 1 : 0,
-      isRead,
+      isIaRead,
     };
     await insertMessage(db, newMessage);
     setMessages((prev) => [newMessage, ...prev]);
@@ -99,7 +99,7 @@ export function useMessages() {
         await addMessage(parsedResponse.response, false, 1);
 
         if (processedMessageIds.length > 0) {
-          await markAsReadAndRefresh(processedMessageIds);
+          await markAsIaReadAndRefresh(processedMessageIds);
         }
 
         return true;
@@ -166,7 +166,7 @@ export function useMessages() {
     getAIResponse,
     checkAutoProgress,
     loadMessages,
-    markAsReadAndRefresh,
+    markAsIaReadAndRefresh,
     processPendingMessages,
   };
 }

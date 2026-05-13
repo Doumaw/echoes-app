@@ -3,6 +3,7 @@ import { AppTheme, getTheme } from "@/constants/theme";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
+    ActivityIndicator,
     Pressable,
     StyleSheet,
     Switch,
@@ -25,7 +26,13 @@ export default function SettingsScreen() {
     }
   }, [gameState?.contactName]);
 
-  if (isLoading || !gameState) return null;
+  if (isLoading || !gameState) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={currentTheme.colors.primary} />
+      </View>
+    );
+  }
 
   const handleSave = async () => {
     await saveGameState({ contactName: tempName.trim() || gameState.contactName });
@@ -57,7 +64,7 @@ export default function SettingsScreen() {
             <Text style={styles.label}>Mode Sombre</Text>
             <Switch
               value={gameState.theme === "dark"}
-              trackColor={{ false: "#767577", true: currentTheme.colors.primary }}
+              trackColor={{ false: currentTheme.colors.switchTrackOff, true: currentTheme.colors.primary }}
               onValueChange={(value) => {
                 void saveGameState({ theme: value ? "dark" : "light" });
               }}
@@ -74,6 +81,12 @@ export default function SettingsScreen() {
 }
 
 const getStyles = (theme: AppTheme) => StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.background,
+  },
   container: { flex: 1, backgroundColor: theme.colors.background },
   header: {
     paddingTop: 60,
@@ -119,5 +132,5 @@ const getStyles = (theme: AppTheme) => StyleSheet.create({
     marginTop: "auto",
     marginBottom: 30,
   },
-  saveButtonText: { color: "#000", fontWeight: "bold", fontSize: 16 },
+  saveButtonText: { color: theme.colors.buttonPrimaryText, fontWeight: "bold", fontSize: 16 },
 });

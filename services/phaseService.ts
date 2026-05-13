@@ -2,8 +2,11 @@ import { TIME_CONFIG } from "@/constants/timeConfig";
 import { GameState } from "@/types/GameState";
 import { createInitialGameState } from "@/services/gameStateService";
 
-export const FINAL_TWIST_MESSAGE =
-  "🔔 ALERTE: Le corps d'une jeune fille disparue en 2016 a été retrouvé dans une vieille mine désaffectée.";
+export const FINAL_TWIST_MESSAGES = [
+  "... attends... il y a quelque chose plus haut... je vois une lumiere je crois...",
+  "🔔 ALERTE INFO: Le corps d'une jeune fille disparue en 2016 a été retrouvé dans une vieille mine désaffectée des Ardennes.",
+  "Les autorites confirment qu'il s'agirait de Julie M., 24 ans, disparue lors d'une randonnee en 2016.",
+];
 
 export function getCurrentGameHour() {
   const now = new Date();

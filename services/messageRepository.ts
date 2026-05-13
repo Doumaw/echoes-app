@@ -3,7 +3,7 @@ import { Message } from "@/types/Message";
 
 export async function getAllMessages(db: SQLiteDatabase) {
   return db.getAllAsync<Message>(
-    "SELECT * FROM messages ORDER BY createdAt DESC",
+    "SELECT id, text, createdAt, isUser, isRead AS isIaRead FROM messages ORDER BY createdAt DESC",
   );
 }
 
@@ -17,14 +17,14 @@ export async function getMessagesByIds(
 
   const placeholders = messageIds.map(() => "?").join(",");
   return db.getAllAsync<Message>(
-    `SELECT * FROM messages WHERE id IN (${placeholders}) ORDER BY createdAt ASC`,
+    `SELECT id, text, createdAt, isUser, isRead AS isIaRead FROM messages WHERE id IN (${placeholders}) ORDER BY createdAt ASC`,
     messageIds,
   );
 }
 
 export async function getLastAssistantMessage(db: SQLiteDatabase) {
   return db.getFirstAsync<Message>(
-    "SELECT * FROM messages WHERE isUser = 0 ORDER BY createdAt DESC LIMIT 1",
+    "SELECT id, text, createdAt, isUser, isRead AS isIaRead FROM messages WHERE isUser = 0 ORDER BY createdAt DESC LIMIT 1",
   );
 }
 
@@ -36,12 +36,12 @@ export async function insertMessage(db: SQLiteDatabase, message: Message) {
       message.text,
       message.createdAt,
       message.isUser,
-      message.isRead,
+      message.isIaRead,
     ],
   );
 }
 
-export async function markMessagesAsRead(
+export async function markMessagesAsIaRead(
   db: SQLiteDatabase,
   messageIds: string[],
 ) {

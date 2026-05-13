@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { getBusyDurationMs } from "@/constants/timeConfig";
 import { clearMessages, insertMessage } from "@/services/messageRepository";
 import {
-  FINAL_TWIST_MESSAGE,
+  FINAL_TWIST_MESSAGES,
   createResetGameState,
   getCurrentGameHour,
   shouldJulieBeAsleep,
@@ -36,13 +36,15 @@ export function usePhaseManagement(
       pendingMessageIds: [],
     });
 
-    await insertMessage(db, {
-      id: Date.now().toString(),
-      text: FINAL_TWIST_MESSAGE,
-      createdAt: Date.now(),
-      isUser: 0,
-      isRead: 1,
-    });
+    for (const [index, text] of FINAL_TWIST_MESSAGES.entries()) {
+      await insertMessage(db, {
+        id: `${Date.now()}_${index}`,
+        text,
+        createdAt: Date.now() + index,
+        isUser: 0,
+        isIaRead: 1,
+      });
+    }
   }, [db, saveGameState]);
 
   const resetGame = useCallback(async () => {

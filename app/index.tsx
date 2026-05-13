@@ -5,11 +5,11 @@ import { Message } from "@/types/Message";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import React, { useCallback, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { gameState, loadState } = useGameState();
+  const { gameState, loadState, isLoading } = useGameState();
   const db = useSQLiteContext();
   const [lastMessage, setLastMessage] = useState<Message | null>(null);
 
@@ -37,6 +37,14 @@ export default function HomeScreen() {
       loadLastMessage();
     }, [loadState, loadLastMessage])
   );
+
+  if (isLoading || !gameState) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={currentTheme.colors.primary} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -77,6 +85,12 @@ export default function HomeScreen() {
 }
 
 const getStyles = (theme: AppTheme) => StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.background,
+  },
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,

@@ -1,5 +1,6 @@
 import React from "react";
 import {
+  ActivityIndicator,
   FlatList,
   KeyboardAvoidingView,
   Platform,
@@ -30,7 +31,13 @@ export default function ChatScreen() {
   const currentTheme = getTheme(themeMode);
   const styles = getStyles(currentTheme);
 
-  if (isLoading) return null;
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={currentTheme.colors.primary} />
+      </View>
+    );
+  }
 
   return (
     <View
@@ -74,6 +81,12 @@ export default function ChatScreen() {
 }
 
 const getStyles = (theme: AppTheme) => StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.background,
+  },
   container: { flex: 1, backgroundColor: theme.colors.background },
   flex: { flex: 1 },
   listContent: { padding: theme.spacing.md },

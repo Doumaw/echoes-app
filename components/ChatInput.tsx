@@ -51,7 +51,7 @@ export function ChatInput({ onSend, disabled, theme }: Props) {
         <Text
           style={[
             styles.sendIcon,
-            { color: canSend ? "#000000" : theme.colors.textMuted },
+            { color: canSend ? theme.colors.buttonPrimaryText : theme.colors.textMuted },
           ]}
         >
           ↑

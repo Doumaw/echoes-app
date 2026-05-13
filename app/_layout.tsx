@@ -16,10 +16,10 @@ export default function RootLayout() {
       console.log("Démarrage de la vérification SQLite...");
       await migrateDbIfNeeded(db);
       console.log("SQLite prêt ! Libération de l'écran.");
-
-      await SplashScreen.hideAsync();
     } catch (error) {
       console.error("Erreur critique d'initialisation DB:", error);
+    } finally {
+      await SplashScreen.hideAsync();
     }
   };
 

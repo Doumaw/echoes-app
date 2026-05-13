@@ -14,7 +14,6 @@ export function useChatController() {
     sendFirstSOS,
     getAIResponse,
     loadMessages,
-    markAsReadAndRefresh,
     processPendingMessages,
   } = useMessages();
   const { gameState, saveGameState, isLoading, loadState } = useGameState();
@@ -66,20 +65,6 @@ export function useChatController() {
     );
   };
 
-  const markJulieMessagesAsReadIfNeeded = async () => {
-    if (messages.length === 0) {
-      return;
-    }
-
-    const julieMessageIds = messages
-      .filter((message) => message.isUser === 0 && message.isRead === 0)
-      .map((message) => message.id);
-
-    if (julieMessageIds.length > 0) {
-      await markAsReadAndRefresh(julieMessageIds);
-    }
-  };
-
   const handleDevCommandIfNeeded = async (text: string) => {
     const devCommandAction = getDevCommandAction(text);
 
@@ -113,10 +98,6 @@ export function useChatController() {
     gameState,
     saveGameState,
   ]);
-
-  useEffect(() => {
-    void markJulieMessagesAsReadIfNeeded();
-  }, [messages, markAsReadAndRefresh]);
 
   const handleSend = async (text: string) => {
     if (!gameState) return;
