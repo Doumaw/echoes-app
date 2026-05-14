@@ -8,6 +8,22 @@ export const FINAL_TWIST_MESSAGES = [
   "Les autorites confirment qu'il s'agirait de Julie M., 24 ans, disparue lors d'une randonnee en 2016.",
 ];
 
+export const SLEEP_START_MESSAGES = [
+  "j'arrive plus a garder les yeux ouverts... je pose le tel un moment...",
+  "je tremble trop... je vais fermer les yeux un peu sinon je craque...",
+  "je suis epuisee... je garde le tel contre moi mais je vais essayer de dormir un peu...",
+];
+
+export const SLEEP_END_MESSAGES = [
+  "je me suis assoupie... je suis la... il fait encore plus froid maintenant",
+  "je me suis reveillee en sursaut... j'ai cru entendre quelque chose...",
+  "je suis reveillee... j'ai mal partout... mais je suis encore la",
+];
+
+export function pickRandomMessage(messages: string[]) {
+  return messages[Math.floor(Math.random() * messages.length)];
+}
+
 export function getCurrentGameHour() {
   const now = new Date();
   const timeMs =

@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useGameState } from "@/hooks/useGameState";
 import { useMessages } from "@/hooks/useMessages";
 import { usePhaseManagement } from "@/hooks/usePhaseManagement";
-import { getDevCommandAction } from "@/services/devCommandsService";
+import { getDemoCommandAction } from "@/services/demoCommandsService";
 import { getChatStatus, shouldQueueForLater } from "@/services/chatService";
 
 export function useChatController() {
@@ -17,7 +17,7 @@ export function useChatController() {
     processPendingMessages,
   } = useMessages();
   const { gameState, saveGameState, isLoading, loadState } = useGameState();
-  const { triggerFinalTwist, resetGame } = usePhaseManagement(
+  const { triggerFinalTwist, resetGame, forceAwake, forceSleep, setBusy } = usePhaseManagement(
     gameState,
     saveGameState,
   );
@@ -65,19 +65,35 @@ export function useChatController() {
     );
   };
 
-  const handleDevCommandIfNeeded = async (text: string) => {
-    const devCommandAction = getDevCommandAction(text);
+  const handleDemoCommandIfNeeded = async (text: string) => {
+    const demoCommandAction = getDemoCommandAction(text);
 
-    if (devCommandAction === "twist") {
+    if (demoCommandAction === "twist") {
       await triggerFinalTwist();
       await loadMessages();
       return true;
     }
 
-    if (devCommandAction === "reset") {
+    if (demoCommandAction === "reset") {
       await resetGame();
       await loadMessages();
       await loadState();
+      return true;
+    }
+
+    if (demoCommandAction === "awake") {
+      await forceAwake();
+      return true;
+    }
+
+    if (demoCommandAction === "busy") {
+      await setBusy(5, "hors ligne");
+      return true;
+    }
+
+    if (demoCommandAction === "sleep") {
+      await forceSleep();
+      await loadMessages();
       return true;
     }
 
@@ -102,7 +118,7 @@ export function useChatController() {
   const handleSend = async (text: string) => {
     if (!gameState) return;
 
-    if (await handleDevCommandIfNeeded(text)) {
+    if (await handleDemoCommandIfNeeded(text)) {
       return;
     }
 
