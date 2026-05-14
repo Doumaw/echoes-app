@@ -1,6 +1,7 @@
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useEffect, useRef } from "react";
 import {
+  BUSY_RETURN_MESSAGES,
   FINAL_TWIST_MESSAGES,
   SLEEP_END_MESSAGES,
   SLEEP_START_MESSAGES,
@@ -61,6 +62,10 @@ export function usePhaseManagement(
   }, [db, gameState, saveGameState]);
 
   const forceAwake = useCallback(async () => {
+    const hasPendingMessages = Boolean(
+      gameState?.pendingMessageIds && gameState.pendingMessageIds.length > 0,
+    );
+
     await saveGameState({
       juliePhase: "awake",
       julieBusyUntil: undefined,
@@ -68,7 +73,17 @@ export function usePhaseManagement(
       nextSleepAt: getNextSleepTimestamp(Date.now()),
       busyReason: undefined,
     });
-  }, [saveGameState]);
+
+    if (!hasPendingMessages) {
+      await insertMessage(db, {
+        id: `${Date.now()}_forced_awake`,
+        text: pickRandomMessage(BUSY_RETURN_MESSAGES),
+        createdAt: Date.now(),
+        isUser: 0,
+        isIaRead: 1,
+      });
+    }
+  }, [db, gameState?.pendingMessageIds, saveGameState]);
 
   const forceSleep = useCallback(async () => {
     const now = Date.now();
@@ -135,6 +150,17 @@ export function usePhaseManagement(
         julieBusyUntil: undefined,
         busyReason: undefined,
       });
+
+      if (!gameState.pendingMessageIds || gameState.pendingMessageIds.length === 0) {
+        await insertMessage(db, {
+          id: `${Date.now()}_busy_return`,
+          text: pickRandomMessage(BUSY_RETURN_MESSAGES),
+          createdAt: Date.now(),
+          isUser: 0,
+          isIaRead: 1,
+        });
+      }
+
       return;
     }
 
@@ -145,13 +171,17 @@ export function usePhaseManagement(
         julieWakeUpTime: undefined,
         nextSleepAt: getNextSleepTimestamp(now),
       });
-      await insertMessage(db, {
-        id: `${Date.now()}_wake`,
-        text: pickRandomMessage(SLEEP_END_MESSAGES),
-        createdAt: Date.now(),
-        isUser: 0,
-        isIaRead: 1,
-      });
+
+      if (!gameState.pendingMessageIds || gameState.pendingMessageIds.length === 0) {
+        await insertMessage(db, {
+          id: `${Date.now()}_wake`,
+          text: pickRandomMessage(SLEEP_END_MESSAGES),
+          createdAt: Date.now(),
+          isUser: 0,
+          isIaRead: 1,
+        });
+      }
+
       return;
     }
 

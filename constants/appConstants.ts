@@ -23,6 +23,12 @@ export const SLEEP_END_MESSAGES = [
   "je suis reveillee... j'ai mal partout... mais je suis encore la",
 ];
 
+export const BUSY_RETURN_MESSAGES = [
+  "je suis revenue... tu es toujours la ?",
+  "j'ai repris le tel... je peux te reparler",
+  "je suis la... j'ai fini ce que j'essayais de faire",
+];
+
 // Twist final
 export const FINAL_TWIST_MESSAGES = [
   "... attends... il y a quelque chose plus haut... je vois une lumiere je crois...",

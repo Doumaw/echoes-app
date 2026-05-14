@@ -65,6 +65,15 @@ export function useChatController() {
     );
   };
 
+  const refreshMessagesIfJulieCameBack = async () => {
+    if (
+      gameState?.juliePhase === "awake" &&
+      (!gameState.pendingMessageIds || gameState.pendingMessageIds.length === 0)
+    ) {
+      await loadMessages();
+    }
+  };
+
   const handleDemoCommandIfNeeded = async (text: string) => {
     const demoCommandAction = getDemoCommandAction(text);
 
@@ -83,6 +92,7 @@ export function useChatController() {
 
     if (demoCommandAction === "awake") {
       await forceAwake();
+      await loadMessages();
       return true;
     }
 
@@ -114,6 +124,10 @@ export function useChatController() {
     gameState,
     saveGameState,
   ]);
+
+  useEffect(() => {
+    void refreshMessagesIfJulieCameBack();
+  }, [gameState?.juliePhase, gameState?.pendingMessageIds, loadMessages]);
 
   const handleSend = async (text: string) => {
     if (!gameState) return;
