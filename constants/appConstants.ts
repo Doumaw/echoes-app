@@ -50,3 +50,10 @@ export const ALLOWED_AI_NEXT_SITUATIONS = ["leg_freed", null] as const;
 // Stockage / base de données
 export const GAME_STATE_STORAGE_KEY = "ECHOES_GAME_STATE";
 export const DATABASE_VERSION = 2;
+
+// Temps et rythme du jeu
+export const TIME_CONFIG = {
+  timeMultiplier: 1,
+  plotTwistAfterMs: 3 * 24 * 60 * 60 * 1000,
+  debugMode: false,
+};

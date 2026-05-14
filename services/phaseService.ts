@@ -8,8 +8,8 @@ import {
   SLEEP_DURATION_MIN_MS,
   SLEEP_END_MESSAGES,
   SLEEP_START_MESSAGES,
+  TIME_CONFIG,
 } from "@/constants/appConstants";
-import { TIME_CONFIG } from "@/constants/timeConfig";
 import { GameState } from "@/types/GameState";
 import { createInitialGameState } from "@/services/gameStateService";
 

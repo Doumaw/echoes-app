@@ -5,7 +5,6 @@ import {
   SLEEP_END_MESSAGES,
   SLEEP_START_MESSAGES,
 } from "@/constants/appConstants";
-import { getBusyDurationMs } from "@/constants/timeConfig";
 import { clearMessages, insertMessage } from "@/services/messageRepository";
 import {
   createResetGameState,
@@ -19,6 +18,7 @@ import {
   shouldWakeFromBusy,
   shouldWakeFromSleep,
 } from "@/services/phaseService";
+import { getBusyDurationMs } from "@/services/timeService";
 import { GameState } from "@/types/GameState";
 
 /**
