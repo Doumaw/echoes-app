@@ -1,5 +1,5 @@
 import { GameState } from "@/types/GameState";
-import { GAME_STRINGS } from "@/constants/game";
+import { GAME_STRINGS } from "@/constants/appConstants";
 import { parseAIResponse } from "@/services/aiResponseParser";
 import { aiService } from "@/services/aiService";
 import { buildAssistantStateUpdates } from "@/services/chatService";

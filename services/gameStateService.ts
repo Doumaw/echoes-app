@@ -1,7 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { GAME_STATE_STORAGE_KEY } from "@/constants/appConstants";
 import { GameState } from "@/types/GameState";
-
-export const GAME_STATE_STORAGE_KEY = "ECHOES_GAME_STATE";
 
 export function createInitialGameState(
   preserved?: Partial<Pick<GameState, "contactName" | "theme">>,

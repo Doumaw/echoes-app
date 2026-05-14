@@ -1,10 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-const STORAGE_KEY = "ECHOES_GAME_STATE";
+import { GAME_STATE_STORAGE_KEY } from "@/constants/appConstants";
 
 export async function resetGameState() {
   try {
-    await AsyncStorage.removeItem(STORAGE_KEY);
+    await AsyncStorage.removeItem(GAME_STATE_STORAGE_KEY);
     console.log("✅ Game state reset successfully");
   } catch (error) {
     console.error("❌ Error resetting game state:", error);
@@ -13,7 +12,7 @@ export async function resetGameState() {
 
 export async function logGameState() {
   try {
-    const saved = await AsyncStorage.getItem(STORAGE_KEY);
+    const saved = await AsyncStorage.getItem(GAME_STATE_STORAGE_KEY);
     if (saved) {
       const state = JSON.parse(saved);
       console.log("📊 Current game state:", JSON.stringify(state, null, 2));

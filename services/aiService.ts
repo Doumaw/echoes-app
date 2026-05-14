@@ -1,10 +1,9 @@
+import { AI_API_URL, AI_MODEL } from "@/constants/appConstants";
 import { getJuliePrompt } from "@/constants/prompts";
 import { GameState } from "@/types/GameState";
 import { Message } from "@/types/Message";
 
 const API_KEY = process.env.EXPO_PUBLIC_OPENROUTER_KEY;
-const API_URL = "https://openrouter.ai/api/v1/chat/completions";
-const MODEL = "nvidia/nemotron-3-nano-30b-a3b:free";
 
 export const aiService = {
   async getResponse(history: Message[], gameState: GameState) {
@@ -15,7 +14,7 @@ export const aiService = {
       content: msg.text,
     }));
 
-    const response = await fetch(API_URL, {
+      const response = await fetch(AI_API_URL, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${API_KEY}`,
@@ -24,7 +23,7 @@ export const aiService = {
         "X-Title": "Echoes Game",
       },
       body: JSON.stringify({
-        model: MODEL,
+          model: AI_MODEL,
         messages: [
           { role: "system", content: getJuliePrompt(gameState, history) },
           ...formattedHistory,

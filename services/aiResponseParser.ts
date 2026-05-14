@@ -1,8 +1,14 @@
+import {
+  ALLOWED_AI_DURATIONS,
+  ALLOWED_AI_NEXT_SITUATIONS,
+} from "@/constants/appConstants";
 import { ParsedAIResponse } from "@/types/ParsedAIResponse";
 
-const ALLOWED_DURATIONS = [0, 5, 10, 15, 20] as const;
-const ALLOWED_DURATION_VALUES: readonly number[] = ALLOWED_DURATIONS;
-const ALLOWED_NEXT_SITUATIONS = ["leg_freed", null] as const;
+function isAllowedDuration(value: number) {
+  return ALLOWED_AI_DURATIONS.includes(
+    value as (typeof ALLOWED_AI_DURATIONS)[number],
+  );
+}
 
 export function parseAIResponse(raw: unknown): ParsedAIResponse {
   const payload = typeof raw === "string" ? JSON.parse(raw) : raw;
@@ -19,15 +25,15 @@ export function parseAIResponse(raw: unknown): ParsedAIResponse {
     throw new Error("Format inattendu");
   }
 
-  if (!ALLOWED_DURATION_VALUES.includes((payload as { duration_minutes: number }).duration_minutes)) {
+  if (!isAllowedDuration((payload as { duration_minutes: number }).duration_minutes)) {
     throw new Error(
       `Durée invalide: ${(payload as { duration_minutes: number }).duration_minutes}`,
     );
   }
 
   if (
-    !ALLOWED_NEXT_SITUATIONS.includes(
-      nextSituation as (typeof ALLOWED_NEXT_SITUATIONS)[number],
+    !ALLOWED_AI_NEXT_SITUATIONS.includes(
+      nextSituation as (typeof ALLOWED_AI_NEXT_SITUATIONS)[number],
     )
   ) {
     throw new Error(`Situation invalide: ${String(nextSituation)}`);

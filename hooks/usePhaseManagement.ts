@@ -1,11 +1,13 @@
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useEffect, useRef } from "react";
-import { getBusyDurationMs } from "@/constants/timeConfig";
-import { clearMessages, insertMessage } from "@/services/messageRepository";
 import {
   FINAL_TWIST_MESSAGES,
   SLEEP_END_MESSAGES,
   SLEEP_START_MESSAGES,
+} from "@/constants/appConstants";
+import { getBusyDurationMs } from "@/constants/timeConfig";
+import { clearMessages, insertMessage } from "@/services/messageRepository";
+import {
   createResetGameState,
   getCurrentGameHour,
   getNextWakeUpTime,

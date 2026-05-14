@@ -1,8 +1,7 @@
+import { DATABASE_VERSION } from "@/constants/appConstants";
 import { SQLiteDatabase } from "expo-sqlite";
 
 export async function migrateDbIfNeeded(db: SQLiteDatabase) {
-  const DATABASE_VERSION = 2;
-
   // Optimisation : Write-Ahead Logging
   await db.execAsync(`PRAGMA journal_mode = 'wal';`);
 

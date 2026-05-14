@@ -1,24 +1,11 @@
+import {
+  FINAL_TWIST_MESSAGES,
+  SLEEP_END_MESSAGES,
+  SLEEP_START_MESSAGES,
+} from "@/constants/appConstants";
 import { TIME_CONFIG } from "@/constants/timeConfig";
 import { GameState } from "@/types/GameState";
 import { createInitialGameState } from "@/services/gameStateService";
-
-export const FINAL_TWIST_MESSAGES = [
-  "... attends... il y a quelque chose plus haut... je vois une lumiere je crois...",
-  "🔔 ALERTE INFO: Le corps d'une jeune fille disparue en 2016 a été retrouvé dans une vieille mine désaffectée des Ardennes.",
-  "Les autorites confirment qu'il s'agirait de Julie M., 24 ans, disparue lors d'une randonnee en 2016.",
-];
-
-export const SLEEP_START_MESSAGES = [
-  "j'arrive plus a garder les yeux ouverts... je pose le tel un moment...",
-  "je tremble trop... je vais fermer les yeux un peu sinon je craque...",
-  "je suis epuisee... je garde le tel contre moi mais je vais essayer de dormir un peu...",
-];
-
-export const SLEEP_END_MESSAGES = [
-  "je me suis assoupie... je suis la... il fait encore plus froid maintenant",
-  "je me suis reveillee en sursaut... j'ai cru entendre quelque chose...",
-  "je suis reveillee... j'ai mal partout... mais je suis encore la",
-];
 
 export function pickRandomMessage(messages: string[]) {
   return messages[Math.floor(Math.random() * messages.length)];
