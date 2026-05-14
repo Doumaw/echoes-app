@@ -1,5 +1,11 @@
 import {
+  DEMO_SLEEP_DURATION_MS,
+  FIRST_SLEEP_AFTER_MS,
   FINAL_TWIST_MESSAGES,
+  NEXT_SLEEP_MAX_DELAY_MS,
+  NEXT_SLEEP_MIN_DELAY_MS,
+  SLEEP_DURATION_MAX_MS,
+  SLEEP_DURATION_MIN_MS,
   SLEEP_END_MESSAGES,
   SLEEP_START_MESSAGES,
 } from "@/constants/appConstants";
@@ -11,35 +17,27 @@ export function pickRandomMessage(messages: string[]) {
   return messages[Math.floor(Math.random() * messages.length)];
 }
 
-export function getCurrentGameHour() {
-  const now = new Date();
-  const timeMs =
-    now.getHours() * 60 * 60 * 1000 + now.getMinutes() * 60 * 1000;
-  return ((timeMs * TIME_CONFIG.timeMultiplier) / (60 * 60 * 1000)) % 24;
+export function getRandomSleepDurationMs() {
+  return (
+    SLEEP_DURATION_MIN_MS +
+    Math.floor(Math.random() * (SLEEP_DURATION_MAX_MS - SLEEP_DURATION_MIN_MS))
+  );
 }
 
-export function shouldJulieBeAsleep() {
-  const currentHour = getCurrentGameHour();
-  const { startHour, endHour } = TIME_CONFIG.sleepSchedule;
-
-  if (startHour > endHour) {
-    return currentHour >= startHour || currentHour < endHour;
-  }
-
-  return currentHour >= startHour && currentHour < endHour;
+export function getNextSleepTimestamp(from: number) {
+  return (
+    from +
+    NEXT_SLEEP_MIN_DELAY_MS +
+    Math.floor(Math.random() * (NEXT_SLEEP_MAX_DELAY_MS - NEXT_SLEEP_MIN_DELAY_MS))
+  );
 }
 
-export function getNextWakeUpTime() {
-  const { endHour } = TIME_CONFIG.sleepSchedule;
-  const now = new Date();
-  const wakeUpTime = new Date(now);
-  wakeUpTime.setHours(endHour, 0, 0, 0);
+export function getFirstSleepTimestamp(firstMessageTimestamp: number) {
+  return firstMessageTimestamp + FIRST_SLEEP_AFTER_MS;
+}
 
-  if (wakeUpTime <= now) {
-    wakeUpTime.setDate(wakeUpTime.getDate() + 1);
-  }
-
-  return wakeUpTime.getTime();
+export function getDemoSleepDurationMs() {
+  return DEMO_SLEEP_DURATION_MS;
 }
 
 export function shouldTriggerFinalTwist(gameState: GameState, now: number) {
@@ -63,6 +61,16 @@ export function shouldWakeFromSleep(gameState: GameState, now: number) {
     gameState.juliePhase === "asleep" &&
       gameState.julieWakeUpTime &&
       now >= gameState.julieWakeUpTime,
+  );
+}
+
+export function shouldStartSleep(gameState: GameState, now: number) {
+  return Boolean(
+    gameState.hasSeenIntro &&
+      gameState.juliePhase === "awake" &&
+      gameState.nextSleepAt &&
+      now >= gameState.nextSleepAt &&
+      (!gameState.pendingMessageIds || gameState.pendingMessageIds.length === 0),
   );
 }
 

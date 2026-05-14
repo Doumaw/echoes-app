@@ -4,6 +4,13 @@ export const GAME_STRINGS = {
 };
 
 // Sommeil
+export const FIRST_SLEEP_AFTER_MS = 6 * 60 * 60 * 1000;
+export const NEXT_SLEEP_MIN_DELAY_MS = 6 * 60 * 60 * 1000;
+export const NEXT_SLEEP_MAX_DELAY_MS = 10 * 60 * 60 * 1000;
+export const SLEEP_DURATION_MIN_MS = 3 * 60 * 60 * 1000;
+export const SLEEP_DURATION_MAX_MS = 5 * 60 * 60 * 1000;
+export const DEMO_SLEEP_DURATION_MS = 10 * 60 * 1000;
+
 export const SLEEP_START_MESSAGES = [
   "j'arrive plus a garder les yeux ouverts... je pose le tel un moment...",
   "je tremble trop... je vais fermer les yeux un peu sinon je craque...",

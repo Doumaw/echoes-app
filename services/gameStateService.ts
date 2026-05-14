@@ -16,6 +16,7 @@ export function createInitialGameState(
     juliePhase: "awake",
     julieSituation: "trapped",
     julieWakeUpTime: undefined,
+    nextSleepAt: undefined,
     julieBusyUntil: undefined,
     busyReason: undefined,
     firstMessageTimestamp: undefined,

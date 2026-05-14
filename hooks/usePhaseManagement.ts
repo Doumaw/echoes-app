@@ -9,10 +9,12 @@ import { getBusyDurationMs } from "@/constants/timeConfig";
 import { clearMessages, insertMessage } from "@/services/messageRepository";
 import {
   createResetGameState,
-  getCurrentGameHour,
-  getNextWakeUpTime,
+  getDemoSleepDurationMs,
+  getFirstSleepTimestamp,
+  getNextSleepTimestamp,
+  getRandomSleepDurationMs,
   pickRandomMessage,
-  shouldJulieBeAsleep,
+  shouldStartSleep,
   shouldTriggerFinalTwist,
   shouldWakeFromBusy,
   shouldWakeFromSleep,
@@ -63,13 +65,14 @@ export function usePhaseManagement(
       juliePhase: "awake",
       julieBusyUntil: undefined,
       julieWakeUpTime: undefined,
+      nextSleepAt: getNextSleepTimestamp(Date.now()),
       busyReason: undefined,
     });
   }, [saveGameState]);
 
   const forceSleep = useCallback(async () => {
     const now = Date.now();
-    const forcedSleepDurationMs = 10 * 60 * 1000;
+    const forcedSleepDurationMs = getDemoSleepDurationMs();
     await insertMessage(db, {
       id: `${now}_sleep_manual`,
       text: pickRandomMessage(SLEEP_START_MESSAGES),
@@ -80,6 +83,7 @@ export function usePhaseManagement(
     await saveGameState({
       juliePhase: "asleep",
       julieWakeUpTime: now + forcedSleepDurationMs,
+      nextSleepAt: undefined,
       julieBusyUntil: undefined,
       busyReason: undefined,
     });
@@ -139,6 +143,7 @@ export function usePhaseManagement(
       await saveGameState({
         juliePhase: "awake",
         julieWakeUpTime: undefined,
+        nextSleepAt: getNextSleepTimestamp(now),
       });
       await insertMessage(db, {
         id: `${Date.now()}_wake`,
@@ -152,11 +157,19 @@ export function usePhaseManagement(
 
     if (
       gameState.hasSeenIntro &&
-      juliePhase === "awake" &&
-      shouldJulieBeAsleep() &&
-      (!gameState.pendingMessageIds || gameState.pendingMessageIds.length === 0)
+      !gameState.nextSleepAt &&
+      gameState.firstMessageTimestamp &&
+      juliePhase !== "asleep" &&
+      juliePhase !== "finalTwist"
     ) {
-      const wakeUpTime = getNextWakeUpTime();
+      await saveGameState({
+        nextSleepAt: getFirstSleepTimestamp(gameState.firstMessageTimestamp),
+      });
+      return;
+    }
+
+    if (shouldStartSleep(gameState, now)) {
+      const wakeUpTime = now + getRandomSleepDurationMs();
       await insertMessage(db, {
         id: `${Date.now()}_sleep`,
         text: pickRandomMessage(SLEEP_START_MESSAGES),
@@ -165,27 +178,13 @@ export function usePhaseManagement(
         isIaRead: 1,
       });
 
-      console.log("[usePhaseManagement] Time to sleep (22h+)");
+      console.log("[usePhaseManagement] Julie is too tired, going to sleep");
       await saveGameState({
         juliePhase: "asleep",
         julieWakeUpTime: wakeUpTime,
+        nextSleepAt: undefined,
       });
       return;
-    }
-
-    if (juliePhase === "asleep" && !shouldJulieBeAsleep()) {
-      console.log("[usePhaseManagement] Time to wake up");
-      await saveGameState({
-        juliePhase: "awake",
-        julieWakeUpTime: undefined,
-      });
-      await insertMessage(db, {
-        id: `${Date.now()}_wake_early`,
-        text: pickRandomMessage(SLEEP_END_MESSAGES),
-        createdAt: Date.now(),
-        isUser: 0,
-        isIaRead: 1,
-      });
     }
   }, [db, gameState, saveGameState, triggerFinalTwist]);
 
@@ -208,8 +207,6 @@ export function usePhaseManagement(
     forceAwake,
     forceSleep,
     checkPhaseTransitions,
-    shouldJulieBeAsleep,
-    getCurrentGameHour,
     triggerFinalTwist,
     resetGame,
   };

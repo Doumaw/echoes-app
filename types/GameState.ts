@@ -13,6 +13,7 @@ export interface GameState {
   juliePhase: JuliePhase;
   julieSituation: JulieSituation;
   julieWakeUpTime?: number;
+  nextSleepAt?: number;
   julieBusyUntil?: number; // Timestamp quand Julie redevient disponible
   busyReason?: string; // Optionnel : ce que Julie est en train de faire
   firstMessageTimestamp?: number;
