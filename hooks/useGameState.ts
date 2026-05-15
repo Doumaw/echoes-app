@@ -1,4 +1,4 @@
-import { GameStateContext } from "@/hooks/GameStateContext";
+import { GameStateContext } from "@/hooks/GameStateProvider";
 import { useContext } from "react";
 
 export function useGameState() {

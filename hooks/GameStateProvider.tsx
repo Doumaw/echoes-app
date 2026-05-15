@@ -3,9 +3,18 @@ import {
   loadStoredGameState,
   saveStoredGameState,
 } from "@/services/gameStateService";
+import { GameStateContextValue } from "@/types/GameStateContextValue";
 import { GameState } from "@/types/GameState";
-import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
-import { GameStateContext } from "@/hooks/GameStateContext";
+import React, {
+  createContext,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
+export const GameStateContext = createContext<GameStateContextValue | null>(null);
 
 interface Props {
   children: ReactNode;
