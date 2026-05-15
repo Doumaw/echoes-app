@@ -19,12 +19,7 @@ export function ChatHeader({ name, status, theme }: Props) {
       </Pressable>
       <View style={styles.titleContainer}>
         <Text style={styles.headerTitle}>{name}</Text>
-        <Text // TODO A revoir pour correspondre au En ligne et Hors ligne de Julie (Plus si elle écrit ou non)
-          style={[
-            styles.headerStatus,
-            status.includes("écrire") && { color: theme.colors.primary },
-          ]}
-        >
+        <Text style={styles.headerStatus}>
           {status}
         </Text>
       </View>
