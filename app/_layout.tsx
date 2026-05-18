@@ -1,8 +1,9 @@
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { SQLiteProvider } from "expo-sqlite";
-import { theme } from "../constants/theme";
-import { migrateDbIfNeeded } from "../services/db";
+import { theme } from "@/constants/theme";
+import { GameStateProvider } from "@/hooks/GameStateProvider";
+import { migrateDbIfNeeded } from "@/services/databaseService";
 
 // On bloque l'écran d'accueil Expo au lancement
 SplashScreen.preventAutoHideAsync();
@@ -16,21 +17,23 @@ export default function RootLayout() {
       console.log("Démarrage de la vérification SQLite...");
       await migrateDbIfNeeded(db);
       console.log("SQLite prêt ! Libération de l'écran.");
-
-      await SplashScreen.hideAsync();
     } catch (error) {
       console.error("Erreur critique d'initialisation DB:", error);
+    } finally {
+      await SplashScreen.hideAsync();
     }
   };
 
   return (
     <SQLiteProvider databaseName="echoes.db" onInit={handleDbInit}>
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: theme.colors.background },
-        }}
-      />
+      <GameStateProvider>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: theme.colors.background },
+          }}
+        />
+      </GameStateProvider>
     </SQLiteProvider>
   );
 }

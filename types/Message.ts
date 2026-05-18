@@ -3,4 +3,5 @@ export interface Message {
   text: string;
   createdAt: number;
   isUser: number; // 0 (IA) ou 1 (Joueur)
+  isIaRead: number; // 0 (pas encore traité par Julie), 1 (traité par Julie)
 }

@@ -1,0 +1,82 @@
+import {
+  DEMO_SLEEP_DURATION_MS,
+  FIRST_SLEEP_AFTER_MS,
+  FINAL_TWIST_MESSAGES,
+  NEXT_SLEEP_MAX_DELAY_MS,
+  NEXT_SLEEP_MIN_DELAY_MS,
+  SLEEP_DURATION_MAX_MS,
+  SLEEP_DURATION_MIN_MS,
+  SLEEP_END_MESSAGES,
+  SLEEP_START_MESSAGES,
+  TIME_CONFIG,
+} from "@/constants/appConstants";
+import { GameState } from "@/types/GameState";
+import { createInitialGameState } from "@/services/gameStateService";
+
+export function pickRandomMessage(messages: string[]) {
+  return messages[Math.floor(Math.random() * messages.length)];
+}
+
+export function getRandomSleepDurationMs() {
+  return (
+    SLEEP_DURATION_MIN_MS +
+    Math.floor(Math.random() * (SLEEP_DURATION_MAX_MS - SLEEP_DURATION_MIN_MS))
+  );
+}
+
+export function getNextSleepTimestamp(from: number) {
+  return (
+    from +
+    NEXT_SLEEP_MIN_DELAY_MS +
+    Math.floor(Math.random() * (NEXT_SLEEP_MAX_DELAY_MS - NEXT_SLEEP_MIN_DELAY_MS))
+  );
+}
+
+export function getFirstSleepTimestamp(firstMessageTimestamp: number) {
+  return firstMessageTimestamp + FIRST_SLEEP_AFTER_MS;
+}
+
+export function getDemoSleepDurationMs() {
+  return DEMO_SLEEP_DURATION_MS;
+}
+
+export function shouldTriggerFinalTwist(gameState: GameState, now: number) {
+  return Boolean(
+    gameState.firstMessageTimestamp &&
+      now - gameState.firstMessageTimestamp > TIME_CONFIG.plotTwistAfterMs &&
+      gameState.juliePhase !== "finalTwist",
+  );
+}
+
+export function shouldWakeFromBusy(gameState: GameState, now: number) {
+  return Boolean(
+    gameState.juliePhase === "busy" &&
+      gameState.julieBusyUntil &&
+      now >= gameState.julieBusyUntil,
+  );
+}
+
+export function shouldWakeFromSleep(gameState: GameState, now: number) {
+  return Boolean(
+    gameState.juliePhase === "asleep" &&
+      gameState.julieWakeUpTime &&
+      now >= gameState.julieWakeUpTime,
+  );
+}
+
+export function shouldStartSleep(gameState: GameState, now: number) {
+  return Boolean(
+    gameState.hasSeenIntro &&
+      gameState.juliePhase === "awake" &&
+      gameState.nextSleepAt &&
+      now >= gameState.nextSleepAt &&
+      (!gameState.pendingMessageIds || gameState.pendingMessageIds.length === 0),
+  );
+}
+
+export function createResetGameState(gameState: GameState | null) {
+  return createInitialGameState({
+    contactName: gameState?.contactName,
+    theme: gameState?.theme,
+  });
+}

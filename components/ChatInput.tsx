@@ -1,14 +1,16 @@
 import React, { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import { theme } from "../constants/theme";
+import { AppTheme } from "@/constants/theme";
 
 interface Props {
   onSend: (text: string) => void;
   disabled?: boolean;
+  theme: AppTheme;
 }
 
-export function ChatInput({ onSend, disabled }: Props) {
+export function ChatInput({ onSend, disabled, theme }: Props) {
   const [text, setText] = useState("");
+  const styles = getStyles(theme);
 
   // Logique d'activation
   const canSend = text.trim().length > 0 && !disabled;
@@ -49,7 +51,7 @@ export function ChatInput({ onSend, disabled }: Props) {
         <Text
           style={[
             styles.sendIcon,
-            { color: canSend ? "#000000" : theme.colors.textMuted },
+            { color: canSend ? theme.colors.buttonPrimaryText : theme.colors.textMuted },
           ]}
         >
           ↑
@@ -59,7 +61,7 @@ export function ChatInput({ onSend, disabled }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: AppTheme) => StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "flex-end",

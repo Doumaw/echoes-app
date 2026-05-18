@@ -1,7 +1,9 @@
 import { useGameState } from "@/hooks/useGameState";
+import { AppTheme, getTheme } from "@/constants/theme";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
+    ActivityIndicator,
     Pressable,
     StyleSheet,
     Switch,
@@ -9,17 +11,31 @@ import {
     TextInput,
     View,
 } from "react-native";
-import { theme } from "../constants/theme";
 
 export default function SettingsScreen() {
   const router = useRouter();
   const { gameState, saveGameState, isLoading } = useGameState();
   const [tempName, setTempName] = useState(gameState?.contactName || "");
 
-  if (isLoading || !gameState) return null;
+  const currentTheme = getTheme(gameState?.theme || "dark");
+  const styles = getStyles(currentTheme);
+
+  useEffect(() => {
+    if (gameState?.contactName) {
+      setTempName(gameState.contactName);
+    }
+  }, [gameState?.contactName]);
+
+  if (isLoading || !gameState) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={currentTheme.colors.primary} />
+      </View>
+    );
+  }
 
   const handleSave = async () => {
-    await saveGameState({ contactName: tempName });
+    await saveGameState({ contactName: tempName.trim() || gameState.contactName });
     router.back();
   };
 
@@ -39,7 +55,7 @@ export default function SettingsScreen() {
             style={styles.input}
             value={tempName}
             onChangeText={setTempName}
-            placeholderTextColor={theme.colors.textSecondary}
+            placeholderTextColor={currentTheme.colors.textSecondary}
           />
         </View>
 
@@ -47,8 +63,11 @@ export default function SettingsScreen() {
           <View style={styles.row}>
             <Text style={styles.label}>Mode Sombre</Text>
             <Switch
-              value={true}
-              trackColor={{ false: "#767577", true: theme.colors.primary }}
+              value={gameState.theme === "dark"}
+              trackColor={{ false: currentTheme.colors.switchTrackOff, true: currentTheme.colors.primary }}
+              onValueChange={(value) => {
+                void saveGameState({ theme: value ? "dark" : "light" });
+              }}
             />
           </View>
         </View>
@@ -61,7 +80,13 @@ export default function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: AppTheme) => StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.background,
+  },
   container: { flex: 1, backgroundColor: theme.colors.background },
   header: {
     paddingTop: 60,
@@ -107,5 +132,5 @@ const styles = StyleSheet.create({
     marginTop: "auto",
     marginBottom: 30,
   },
-  saveButtonText: { color: "#000", fontWeight: "bold", fontSize: 16 },
+  saveButtonText: { color: theme.colors.buttonPrimaryText, fontWeight: "bold", fontSize: 16 },
 });

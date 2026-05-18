@@ -1,12 +1,50 @@
 import { useGameState } from "@/hooks/useGameState";
-import { useRouter } from "expo-router";
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { theme } from "../constants/theme";
+import { AppTheme, getTheme } from "@/constants/theme";
+import { getLastAssistantMessage } from "@/services/messageRepository";
+import { Message } from "@/types/Message";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useSQLiteContext } from "expo-sqlite";
+import React, { useCallback, useState } from "react";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
-// TODO : Le nom du contact ne change pas sur l'index après modification dans les paramètres. Il faut relancer l'app... 
 export default function HomeScreen() {
   const router = useRouter();
-  const { gameState } = useGameState();
+  const { gameState, loadState, isLoading } = useGameState();
+  const db = useSQLiteContext();
+  const [lastMessage, setLastMessage] = useState<Message | null>(null);
+
+  const currentTheme = getTheme(gameState?.theme || "dark");
+  const styles = getStyles(currentTheme);
+
+  // Charger le dernier message de Julie uniquement (isUser = 0)
+  const loadLastMessage = useCallback(async () => {
+    try {
+      const result = await getLastAssistantMessage(db);
+      if (result) {
+        setLastMessage(result);
+      } else {
+        setLastMessage(null);
+      }
+    } catch (error) {
+      console.error("Erreur lecture dernier message", error);
+    }
+  }, [db]);
+
+  // Re-charger gameState et dernier message à chaque fois que l'écran gagne le focus
+  useFocusEffect(
+    useCallback(() => {
+      loadState();
+      loadLastMessage();
+    }, [loadState, loadLastMessage])
+  );
+
+  if (isLoading || !gameState) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={currentTheme.colors.primary} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -24,7 +62,7 @@ export default function HomeScreen() {
         <Pressable
           style={({ pressed }) => [
             styles.chatRow,
-            pressed && { backgroundColor: theme.colors.surfaceHighlight },
+            pressed && { backgroundColor: currentTheme.colors.surfaceHighlight },
           ]}
           onPress={() => router.push("/chat")}
         >
@@ -35,12 +73,9 @@ export default function HomeScreen() {
           <View style={styles.chatInfo}>
             <Text style={styles.contactName}>
               {gameState?.contactName || "Petit problème"}
-              {/* TODO: Ajouter des paramètres pour personnaliser le nom */}
             </Text>
             <Text style={styles.lastMessage} numberOfLines={1}>
-              {" "}
-              {/* TODO mettre le dernier message de Julie OU faire en sorte que ce soit nouveau et pas un message déjà lu*/}
-              Vous avez un nouveau message.
+              {lastMessage?.text || "Aucun message"}
             </Text>
           </View>
         </Pressable>
@@ -49,7 +84,13 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: AppTheme) => StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.background,
+  },
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
