@@ -1,5 +1,4 @@
-import { GameState } from "@/types/GameState";
-import { GAME_STRINGS } from "@/constants/appConstants";
+import { FIRST_IA_MESSAGE } from "@/constants/appConstants";
 import { aiService } from "@/services/aiService";
 import {
   canRequestAssistantReply,
@@ -11,6 +10,7 @@ import {
   insertMessage,
   markMessagesAsIaRead,
 } from "@/services/messageRepository";
+import { GameState } from "@/types/GameState";
 import { Message } from "@/types/Message";
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -55,7 +55,7 @@ export function useMessages() {
 
   const sendFirstSOS = useCallback(async () => {
     setIsTyping(true);
-    await addMessage(GAME_STRINGS.introStartMessage, false, 1);
+    await addMessage(FIRST_IA_MESSAGE.introStartMessage, false, 1);
     setIsTyping(false);
   }, [addMessage]);
 

@@ -1,5 +1,5 @@
 // Intro
-export const GAME_STRINGS = {
+export const FIRST_IA_MESSAGE = {
   introStartMessage: "Est-ce qu'il y a quelqu'un ?",
 };
 

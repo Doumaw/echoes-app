@@ -1,11 +1,11 @@
-import { Stack } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
-import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
 import { theme } from "@/constants/theme";
 import { GameStateProvider } from "@/hooks/GameStateProvider";
 import { migrateDbIfNeeded } from "@/services/databaseService";
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
 
-// On bloque l'écran d'accueil Expo au lancement
+// On bloque l'écran d'accueil jusqu'a ce que l'init DB soit fait pour éviter des soucis UI
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
