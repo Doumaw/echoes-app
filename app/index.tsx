@@ -1,40 +1,22 @@
 import { useGameState } from "@/hooks/useGameState";
+import { useLastAssistantMessage } from "@/hooks/useLastAssistantMessage";
 import { AppTheme, getTheme } from "@/constants/theme";
-import { getLastAssistantMessage } from "@/services/messageRepository";
-import { Message } from "@/types/Message";
 import { useFocusEffect, useRouter } from "expo-router";
-import { useSQLiteContext } from "expo-sqlite";
-import React, { useCallback, useState } from "react";
+import React, { useCallback } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
 export default function HomeScreen() {
   const router = useRouter();
   const { gameState, loadState, isLoading } = useGameState();
-  const db = useSQLiteContext();
-  const [lastMessage, setLastMessage] = useState<Message | null>(null);
+  const { lastMessage, loadLastMessage } = useLastAssistantMessage();
 
   const currentTheme = getTheme(gameState?.theme || "dark");
   const styles = getStyles(currentTheme);
 
-  // Charger le dernier message de Julie uniquement (isUser = 0)
-  const loadLastMessage = useCallback(async () => {
-    try {
-      const result = await getLastAssistantMessage(db);
-      if (result) {
-        setLastMessage(result);
-      } else {
-        setLastMessage(null);
-      }
-    } catch (error) {
-      console.error("Erreur lecture dernier message", error);
-    }
-  }, [db]);
-
-  // Re-charger gameState et dernier message à chaque fois que l'écran gagne le focus
   useFocusEffect(
     useCallback(() => {
-      loadState();
-      loadLastMessage();
+      void loadState();
+      void loadLastMessage();
     }, [loadState, loadLastMessage])
   );
 

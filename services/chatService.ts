@@ -42,19 +42,3 @@ export function shouldQueueForLater(gameState: GameState) {
     gameState.juliePhase === "busy" || gameState.juliePhase === "asleep"
   );
 }
-
-export function getChatStatus(gameState: GameState | null) {
-  if (!gameState) {
-    return "Problème de connexion";
-  }
-
-  if (
-    gameState.juliePhase === "asleep" ||
-    gameState.juliePhase === "busy" ||
-    gameState.juliePhase === "finalTwist"
-  ) {
-    return "Hors ligne";
-  }
-
-  return "En ligne";
-}
