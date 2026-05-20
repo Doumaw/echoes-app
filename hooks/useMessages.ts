@@ -55,7 +55,7 @@ export function useMessages() {
 
   const sendFirstSOS = useCallback(async () => {
     setIsTyping(true);
-    await addMessage(FIRST_IA_MESSAGE.introStartMessage, false, 1);
+    await addMessage(FIRST_IA_MESSAGE, false, 1);
     setIsTyping(false);
   }, [addMessage]);
 

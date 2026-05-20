@@ -1,7 +1,5 @@
 // Intro
-export const FIRST_IA_MESSAGE = {
-  introStartMessage: "Est-ce qu'il y a quelqu'un ?",
-};
+export const FIRST_IA_MESSAGE = "Est-ce qu'il y a quelqu'un ?";
 
 // Sommeil
 export const FIRST_SLEEP_AFTER_MS = 6 * 60 * 60 * 1000;
