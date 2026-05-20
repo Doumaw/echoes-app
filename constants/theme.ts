@@ -2,21 +2,16 @@ const spacing = {
   xs: 4,
   sm: 8,
   md: 16,
-  lg: 24,
-  xl: 32,
 };
 
 const typography = {
   size: {
     xs: 12,
-    sm: 14,
     md: 16,
     lg: 18,
-    xl: 24,
     title: 28,
   },
   weight: {
-    regular: "400" as const,
     medium: "500" as const,
     bold: "700" as const,
   },
@@ -31,7 +26,6 @@ export const darkTheme = {
     textSecondary: "#888888",
     textMuted: "#555555",
     primary: "#00bfa5",
-    error: "#ff5252",
     buttonPrimaryText: "#000000",
     switchTrackOff: "#767577",
     bubbleUser: "#00bfa5",
@@ -55,7 +49,6 @@ export const lightTheme = {
     textSecondary: "#5f6b76",
     textMuted: "#8a96a1",
     primary: "#00bfa5",
-    error: "#d64b4b",
     buttonPrimaryText: "#04211c",
     switchTrackOff: "#9aa5af",
     bubbleUser: "#00d3b7",

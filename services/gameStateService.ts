@@ -51,11 +51,3 @@ export async function saveStoredGameState(
 
   return nextState;
 }
-
-export async function resetStoredGameState(
-  preserved?: Partial<Pick<GameState, "contactName" | "theme">>,
-) {
-  const nextState = createInitialGameState(preserved);
-  await AsyncStorage.setItem(GAME_STATE_STORAGE_KEY, JSON.stringify(nextState));
-  return nextState;
-}

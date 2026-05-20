@@ -53,11 +53,10 @@ export function useMessages() {
     return newMessage;
   };
 
-  const sendFirstSOS = useCallback(async (onComplete: () => void) => {
+  const sendFirstSOS = useCallback(async () => {
     setIsTyping(true);
     await addMessage(GAME_STRINGS.introStartMessage, false, 1);
     setIsTyping(false);
-    onComplete();
   }, [addMessage]);
 
   const buildHistoryFromDb = useCallback(async () => {
@@ -167,22 +166,13 @@ export function useMessages() {
     }
   };
 
-  const checkAutoProgress = async (
-    _gameState: GameState,
-    _saveGameState: (updates: Partial<GameState>) => Promise<void>,
-  ) => {
-    return;
-  };
-
   return {
     messages,
     isTyping,
     sendMessage: addMessage,
     sendFirstSOS,
     getAIResponse,
-    checkAutoProgress,
     loadMessages,
-    markAsIaReadAndRefresh,
     processPendingMessages,
   };
 }

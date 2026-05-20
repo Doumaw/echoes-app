@@ -7,21 +7,6 @@ export async function getAllMessages(db: SQLiteDatabase) {
   );
 }
 
-export async function getMessagesByIds(
-  db: SQLiteDatabase,
-  messageIds: string[],
-) {
-  if (messageIds.length === 0) {
-    return [];
-  }
-
-  const placeholders = messageIds.map(() => "?").join(",");
-  return db.getAllAsync<Message>(
-    `SELECT id, text, createdAt, isUser, isRead AS isIaRead FROM messages WHERE id IN (${placeholders}) ORDER BY createdAt ASC`, // TODO Vérif si ok niveau sécurité
-    messageIds,
-  );
-}
-
 export async function getLastAssistantMessage(db: SQLiteDatabase) {
   return db.getFirstAsync<Message>(
     "SELECT id, text, createdAt, isUser, isRead AS isIaRead FROM messages WHERE isUser = 0 ORDER BY createdAt DESC LIMIT 1",
@@ -51,7 +36,7 @@ export async function markMessagesAsIaRead(
 
   const placeholders = messageIds.map(() => "?").join(",");
   await db.runAsync(
-    `UPDATE messages SET isRead = 1 WHERE id IN (${placeholders})`, // TODO Vérifier si pas de soucis de sécurité
+    `UPDATE messages SET isRead = 1 WHERE id IN (${placeholders})`,
     messageIds,
   );
 }

@@ -1,6 +1,6 @@
 export type JuliePhase = "awake" | "asleep" | "busy" | "finalTwist";
 
-export type JulieSituation = "trapped" | "leg_freed" | "climbing" | "escaped";
+export type JulieSituation = "trapped" | "leg_freed";
 
 export interface GameState {
   hasSeenIntro: boolean;

@@ -11,19 +11,10 @@ export const getJuliePrompt = (gameState: GameState, history: Message[]) => {
     .join("\n");
 
   // Déterminer la description de la situation basée sur julieSituation
-  let situationText = "";
-  switch (gameState.julieSituation) {
-    case "trapped":
-      situationText = "Ta jambe est COINCEE sous un bloc. Tu ne peux pas vraiment bouger tant qu'elle n'est pas liberee.";
-      break;
-    case "leg_freed":
-      situationText = "Ta jambe est enfin libre. Elle te fait toujours tres mal mais tu peux maintenant bouger, explorer un peu, te trainer, grimper ou improviser selon ce que tu vis.";
-      break;
-    case "climbing":
-    case "escaped":
-      situationText = "Tu peux bouger, meme si c'est douloureux. Tu improvises selon le terrain, la douleur, le froid, le noir et les idees du joueur. Ne reviens pas en arriere en disant que ta jambe est encore bloquee.";
-      break;
-  }
+  const situationText =
+    gameState.julieSituation === "trapped"
+      ? "Ta jambe est COINCEE sous un bloc. Tu ne peux pas vraiment bouger tant qu'elle n'est pas liberee."
+      : "Ta jambe est enfin libre. Elle te fait toujours tres mal mais tu peux maintenant bouger, explorer un peu, te trainer, grimper ou improviser selon ce que tu vis.";
 
   return `
 TON RÔLE : 

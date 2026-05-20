@@ -61,5 +61,4 @@ export const DATABASE_VERSION = 1;
 export const TIME_CONFIG = {
   timeMultiplier: 1,
   plotTwistAfterMs: 3 * 24 * 60 * 60 * 1000,
-  debugMode: false,
 };

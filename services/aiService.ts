@@ -32,7 +32,6 @@ export const aiService = {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
       throw new Error(`API_ERROR: ${response.status}`);
     }
 

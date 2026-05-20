@@ -61,7 +61,7 @@ export function useChatController() {
       firstMessageTimestamp,
     });
 
-    await sendFirstSOS(() => {});
+    await sendFirstSOS();
   };
 
   const processPendingMessagesIfNeeded = async () => {

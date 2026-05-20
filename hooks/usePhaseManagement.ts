@@ -23,11 +23,7 @@ import { getBusyDurationMs } from "@/services/timeService";
 import { GameState } from "@/types/GameState";
 
 /**
- * Hook pour gérer :
- * - Les transitions de phase (awake -> asleep/busy -> awake)
- * - Le sommeil automatique (22h-8h)
- * - Le système de busy avec timer
- * - Le traitement de la file d'attente des messages
+ * Gère les transitions automatiques de Julie : busy, sommeil et twist final.
  */
 export function usePhaseManagement(
   gameState: GameState | null,
@@ -104,12 +100,6 @@ export function usePhaseManagement(
     });
   }, [db, saveGameState]);
 
-  /**
-   * Marquer les messages de Julie comme "lus"
-   */
-  /**
-   * Passer Julie en mode "busy" avec durée
-   */
   const setBusy = useCallback(
     async (durationMinutes: number, reason?: string) => {
       if (!gameState) return;
@@ -127,10 +117,6 @@ export function usePhaseManagement(
     [gameState, saveGameState],
   );
 
-  /**
-   * Vérifier et mettre à jour les transitions de phase
-   * Ne pas appliquer le sommeil automatique si hasSeenIntro est false (début du jeu)
-   */
   const checkPhaseTransitions = useCallback(async () => {
     if (!gameState) return;
 
@@ -218,13 +204,9 @@ export function usePhaseManagement(
     }
   }, [db, gameState, saveGameState, triggerFinalTwist]);
 
-  /**
-   * Setup du timer pour vérifier les transitions régulièrement
-   */
   useEffect(() => {
     checkPhaseTransitions();
 
-    // Vérifier toutes les 10 secondes
     timerRef.current = setInterval(checkPhaseTransitions, 10000);
 
     return () => {
@@ -236,7 +218,6 @@ export function usePhaseManagement(
     setBusy,
     forceAwake,
     forceSleep,
-    checkPhaseTransitions,
     triggerFinalTwist,
     resetGame,
   };
