@@ -1,5 +1,5 @@
-import { SQLiteDatabase } from "expo-sqlite";
 import { Message } from "@/types/Message";
+import { SQLiteDatabase } from "expo-sqlite";
 
 export async function getAllMessages(db: SQLiteDatabase) {
   return db.getAllAsync<Message>(
@@ -17,7 +17,7 @@ export async function getMessagesByIds(
 
   const placeholders = messageIds.map(() => "?").join(",");
   return db.getAllAsync<Message>(
-    `SELECT id, text, createdAt, isUser, isRead AS isIaRead FROM messages WHERE id IN (${placeholders}) ORDER BY createdAt ASC`,
+    `SELECT id, text, createdAt, isUser, isRead AS isIaRead FROM messages WHERE id IN (${placeholders}) ORDER BY createdAt ASC`, // TODO Vérif si ok niveau sécurité
     messageIds,
   );
 }
@@ -51,7 +51,7 @@ export async function markMessagesAsIaRead(
 
   const placeholders = messageIds.map(() => "?").join(",");
   await db.runAsync(
-    `UPDATE messages SET isRead = 1 WHERE id IN (${placeholders})`,
+    `UPDATE messages SET isRead = 1 WHERE id IN (${placeholders})`, // TODO Vérifier si pas de soucis de sécurité
     messageIds,
   );
 }

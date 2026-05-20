@@ -55,7 +55,7 @@ export const ALLOWED_AI_NEXT_SITUATIONS = ["leg_freed", null] as const;
 
 // Stockage / base de données
 export const GAME_STATE_STORAGE_KEY = "ECHOES_GAME_STATE";
-export const DATABASE_VERSION = 2;
+export const DATABASE_VERSION = 1;
 
 // Temps et rythme du jeu
 export const TIME_CONFIG = {
