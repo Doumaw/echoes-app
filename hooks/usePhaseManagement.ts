@@ -9,6 +9,7 @@ import {
 import { clearMessages, insertMessage } from "@/services/messageRepository";
 import {
   createResetGameState,
+  getBusyDurationMs,
   getDemoSleepDurationMs,
   getFirstSleepTimestamp,
   getNextSleepTimestamp,
@@ -19,7 +20,6 @@ import {
   shouldWakeFromBusy,
   shouldWakeFromSleep,
 } from "@/services/phaseService";
-import { getBusyDurationMs } from "@/services/timeService";
 import { GameState } from "@/types/GameState";
 
 /**

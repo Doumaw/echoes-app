@@ -1,11 +1,12 @@
 import {
   DEMO_SLEEP_DURATION_MS,
   FIRST_SLEEP_AFTER_MS,
+  MINUTE_MS,
   NEXT_SLEEP_MAX_DELAY_MS,
   NEXT_SLEEP_MIN_DELAY_MS,
+  PLOT_TWIST_AFTER_MS,
   SLEEP_DURATION_MAX_MS,
   SLEEP_DURATION_MIN_MS,
-  TIME_CONFIG,
 } from "@/constants/appConstants";
 import { GameState } from "@/types/GameState";
 import { createInitialGameState } from "@/services/gameStateService";
@@ -37,10 +38,14 @@ export function getDemoSleepDurationMs() {
   return DEMO_SLEEP_DURATION_MS;
 }
 
+export function getBusyDurationMs(durationMinutes: number) {
+  return durationMinutes * MINUTE_MS;
+}
+
 export function shouldTriggerFinalTwist(gameState: GameState, now: number) {
   return Boolean(
     gameState.firstMessageTimestamp &&
-      now - gameState.firstMessageTimestamp > TIME_CONFIG.plotTwistAfterMs &&
+      now - gameState.firstMessageTimestamp > PLOT_TWIST_AFTER_MS &&
       gameState.juliePhase !== "finalTwist",
   );
 }

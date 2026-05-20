@@ -1,4 +1,4 @@
-import { getBusyDurationMs } from "@/services/timeService";
+import { getBusyDurationMs } from "@/services/phaseService";
 import { ParsedAIResponse } from "@/types/ParsedAIResponse";
 import { GameState } from "@/types/GameState";
 

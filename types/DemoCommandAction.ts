@@ -1,0 +1,1 @@
+export type DemoCommandAction = "twist" | "reset" | "awake" | "busy" | "sleep";
