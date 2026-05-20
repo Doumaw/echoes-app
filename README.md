@@ -1,50 +1,42 @@
-# Welcome to your Expo app 👋
+# Echoes
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Echoes est un MVP de jeu narratif sous forme de messagerie, développé avec React Native et Expo.
 
-## Get started
+Le joueur échange avec Julie, une jeune femme piégée dans une crevasse. Le but est de créer une expérience immersive, proche d'une vraie application de chat, avec des réponses dynamiques, des périodes hors ligne, du sommeil, des actions différées et un twist final commun.
 
-1. Install dependencies
+## Fonctionnement
 
-   ```bash
-   npm install
-   ```
+- messages stockés localement en SQLite
+- état global du jeu stocké en AsyncStorage
+- réponses générées par IA via OpenRouter
+- système de phases pour Julie : disponible, occupée, endormie, fin de jeu
+- thème sombre / clair
+- commandes de démonstration pour accélérer certains états pendant la soutenance
 
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Lancer le projet
 
 ```bash
-npm run reset-project
+npm install
+npx expo start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Structure du projet
 
-## Learn more
+- `app/` : écrans
+- `components/` : composants UI
+- `hooks/` : logique React
+- `services/` : logique métier, stockage, IA
+- `constants/` : constantes globales
+- `types/` : types TypeScript
 
-To learn more about developing your project with Expo, look at the following resources:
+## Commandes de démonstration
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+- `##reset` : remet la partie à zéro
+- `##twist` : déclenche immédiatement la fin
+- `##awake` : force le retour de Julie
+- `##busy` : force Julie à passer hors ligne
+- `##sleep` : force Julie à dormir
 
-## Join the community
+## Remarques
 
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Le projet est pensé comme un MVP étudiant : l'objectif principal est l'immersion, la clarté de l'architecture et la démonstration d'un flux narratif interactif crédible.

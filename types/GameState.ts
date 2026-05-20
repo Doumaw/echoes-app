@@ -4,8 +4,6 @@ export type JulieSituation = "trapped" | "leg_freed";
 
 export interface GameState {
   hasSeenIntro: boolean;
-  lastSeenTimestamp: number;
-  scriptIndex: number;
   contactName: string;
   theme: "light" | "dark";
   iaStress: number;

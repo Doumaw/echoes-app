@@ -11,9 +11,11 @@ import {
     TextInput,
     View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { gameState, saveGameState, isLoading } = useGameState();
   const [tempName, setTempName] = useState(gameState?.contactName || "");
 
@@ -41,7 +43,7 @@ export default function SettingsScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <Pressable onPress={() => router.back()} style={styles.backButton}>
           <Text style={styles.backIcon}>←</Text>
         </Pressable>
@@ -89,7 +91,6 @@ const getStyles = (theme: AppTheme) => StyleSheet.create({
   },
   container: { flex: 1, backgroundColor: theme.colors.background },
   header: {
-    paddingTop: 60,
     paddingBottom: theme.spacing.md,
     paddingHorizontal: theme.spacing.md,
     flexDirection: "row",

@@ -7,8 +7,6 @@ export function createInitialGameState(
 ): GameState {
   return {
     hasSeenIntro: false,
-    lastSeenTimestamp: Date.now(),
-    scriptIndex: 0,
     contactName: preserved?.contactName || "Numéro Inconnu",
     theme: preserved?.theme || "dark",
     iaStress: 10,

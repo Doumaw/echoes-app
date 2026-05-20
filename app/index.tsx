@@ -4,9 +4,11 @@ import { AppTheme, getTheme } from "@/constants/theme";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { gameState, loadState, isLoading } = useGameState();
   const { lastMessage, loadLastMessage } = useLastAssistantMessage();
 
@@ -30,7 +32,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 12 }] }>
         <Text style={styles.headerTitle}>Discussions</Text>
         <Pressable
           onPress={() => router.push("/settings")}
@@ -78,7 +80,6 @@ const getStyles = (theme: AppTheme) => StyleSheet.create({
     backgroundColor: theme.colors.background,
   },
   header: {
-    paddingTop: 60,
     paddingBottom: theme.spacing.md,
     paddingHorizontal: theme.spacing.md,
     borderBottomWidth: 1,
