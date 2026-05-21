@@ -2,6 +2,21 @@ import { getBusyDurationMs } from "@/services/phaseService";
 import { ParsedAIResponse } from "@/types/ParsedAIResponse";
 import { GameState } from "@/types/GameState";
 
+export function canRequestAssistantReply(
+  gameState: GameState | null | undefined,
+  isTyping: boolean,
+) {
+  if (isTyping || !gameState) {
+    return false;
+  }
+
+  return (
+    gameState.juliePhase !== "asleep" &&
+    gameState.juliePhase !== "busy" &&
+    gameState.juliePhase !== "finalTwist"
+  );
+}
+
 export function buildAssistantStateUpdates(
   gameState: GameState,
   parsedResponse: ParsedAIResponse,

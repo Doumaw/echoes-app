@@ -22,6 +22,13 @@ export function createInitialGameState(
   };
 }
 
+export function createResetGameState(gameState: GameState | null) {
+  return createInitialGameState({
+    contactName: gameState?.contactName,
+    theme: gameState?.theme,
+  });
+}
+
 export async function loadStoredGameState() {
   const saved = await AsyncStorage.getItem(GAME_STATE_STORAGE_KEY);
   if (!saved) {

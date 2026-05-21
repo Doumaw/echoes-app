@@ -6,9 +6,9 @@ import {
   SLEEP_END_MESSAGES,
   SLEEP_START_MESSAGES,
 } from "@/constants/appConstants";
+import { createResetGameState } from "@/services/gameStateService";
 import { clearMessages, insertMessage } from "@/services/messageRepository";
 import {
-  createResetGameState,
   getBusyDurationMs,
   getDemoSleepDurationMs,
   getFirstSleepTimestamp,

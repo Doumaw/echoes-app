@@ -9,7 +9,6 @@ import {
   SLEEP_DURATION_MIN_MS,
 } from "@/constants/appConstants";
 import { GameState } from "@/types/GameState";
-import { createInitialGameState } from "@/services/gameStateService";
 
 export function pickRandomMessage(messages: string[]) {
   return messages[Math.floor(Math.random() * messages.length)];
@@ -74,11 +73,4 @@ export function shouldStartSleep(gameState: GameState, now: number) {
       now >= gameState.nextSleepAt &&
       (!gameState.pendingMessageIds || gameState.pendingMessageIds.length === 0),
   );
-}
-
-export function createResetGameState(gameState: GameState | null) {
-  return createInitialGameState({
-    contactName: gameState?.contactName,
-    theme: gameState?.theme,
-  });
 }

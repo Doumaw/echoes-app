@@ -1,10 +1,10 @@
 import { FIRST_IA_MESSAGE } from "@/constants/appConstants";
 import { aiService } from "@/services/aiService";
 import {
+  buildAssistantStateUpdates,
   canRequestAssistantReply,
-  logParsedAssistantResponse,
-  parseAssistantResponse,
-} from "@/services/assistantReplyService";
+} from "@/services/chatService";
+import { parseAIResponse } from "@/services/aiResponseParser";
 import {
   getAllMessages,
   insertMessage,
@@ -77,12 +77,16 @@ export function useMessages() {
       saveGameState: (updates: Partial<GameState>) => Promise<void>,
       processedMessageIds: string[],
     ) => {
-      const { parsedResponse, stateUpdatesBuilder } =
-        parseAssistantResponse(rawResponse);
+      const parsedResponse = parseAIResponse(rawResponse);
 
-      logParsedAssistantResponse(parsedResponse);
+      console.log("[useMessages] IA Response (valid):", {
+        duration_minutes: parsedResponse.durationMinutes,
+        stress_change: parsedResponse.stressChange,
+        trust_change: parsedResponse.trustChange,
+        next_situation: parsedResponse.nextSituation,
+      });
 
-      await saveGameState(stateUpdatesBuilder(gameState));
+      await saveGameState(buildAssistantStateUpdates(gameState, parsedResponse));
       await addMessage(parsedResponse.response, false, 1);
 
       if (processedMessageIds.length > 0) {
