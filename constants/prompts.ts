@@ -2,15 +2,13 @@ import { GameState } from "@/types/GameState";
 import { Message } from "@/types/Message";
 
 export const getJuliePrompt = (gameState: GameState, history: Message[]) => {
-  // On prend les 15 derniers messages et on les formate proprement pour l'IA
-  // On les remet dans l'ordre chronologique (le plus vieux en premier)
+  // On prend les 15 derniers messages qu'on inverse et on donne à IA pour + de context
   const lastMessages = [...history]
     .slice(0, 15)
     .reverse()
     .map(msg => `${msg.isUser === 1 ? "Joueur" : "Julie"}: ${msg.text}`)
     .join("\n");
 
-  // Déterminer la description de la situation basée sur julieSituation
   const situationText =
     gameState.julieSituation === "trapped"
       ? "Ta jambe est COINCEE sous un bloc. Tu ne peux pas vraiment bouger tant qu'elle n'est pas liberee."

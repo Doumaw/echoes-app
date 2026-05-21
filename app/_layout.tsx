@@ -10,8 +10,8 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
 
-  // Note : onInit est déclenché par le Provider UNE SEULE FOIS à l'ouverture de la DB.
-  // Il se comporte comme un useEffect avec un tableau vide [], inutile d'en rajouter un.
+  // onInit est déclenché par le Provider UNE SEULE FOIS à l'ouverture de la DB
+  // Il se comporte comme un useEffect avec un tableau vide [], inutile d'en rajouter un
   const handleDbInit = async (db: SQLiteDatabase) => {
     try {
       console.log("Démarrage de la vérification SQLite...");

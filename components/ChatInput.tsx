@@ -1,6 +1,6 @@
+import { AppTheme } from "@/constants/theme";
 import React, { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import { AppTheme } from "@/constants/theme";
 
 interface Props {
   onSend: (text: string) => void;
@@ -38,13 +38,11 @@ export function ChatInput({ onSend, disabled, theme }: Props) {
         disabled={!canSend}
         style={({ pressed }) => [
           styles.sendButton,
-          // Couleur de fond dynamique
           {
             backgroundColor: canSend
               ? theme.colors.primary
               : theme.colors.surfaceHighlight,
           },
-          // Feedback tactile
           pressed && canSend && { opacity: 0.7, transform: [{ scale: 0.95 }] },
         ]}
       >
@@ -80,20 +78,20 @@ const getStyles = (theme: AppTheme) => StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 10,
     fontSize: theme.typography.size.md,
-    maxHeight: 120, // Évite que l'input ne mange tout l'écran
+    maxHeight: 120, 
     marginRight: theme.spacing.sm,
   },
   sendButton: {
     width: 40,
     height: 40,
-    borderRadius: 20, // Cercle parfait
+    borderRadius: 20, 
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 2, // Alignement optique avec l'input
+    marginBottom: 2,
   },
   sendIcon: {
     fontSize: 22,
     fontWeight: "bold",
-    marginTop: -2, // Ajustement visuel pour centrer la flèche
+    marginTop: -2,
   },
 });

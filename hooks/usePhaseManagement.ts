@@ -1,5 +1,3 @@
-import { useSQLiteContext } from "expo-sqlite";
-import { useCallback, useEffect, useRef } from "react";
 import {
   BUSY_RETURN_MESSAGES,
   FINAL_TWIST_MESSAGES,
@@ -21,10 +19,9 @@ import {
   shouldWakeFromSleep,
 } from "@/services/phaseService";
 import { GameState } from "@/types/GameState";
+import { useSQLiteContext } from "expo-sqlite";
+import { useCallback, useEffect, useRef } from "react";
 
-/**
- * Gère les transitions automatiques de Julie : busy, sommeil et twist final.
- */
 export function usePhaseManagement(
   gameState: GameState | null,
   saveGameState: (updates: Partial<GameState>) => Promise<void>,

@@ -12,8 +12,8 @@ export interface GameState {
   julieSituation: JulieSituation;
   julieWakeUpTime?: number;
   nextSleepAt?: number;
-  julieBusyUntil?: number; // Timestamp quand Julie redevient disponible
-  busyReason?: string; // Optionnel : ce que Julie est en train de faire
+  julieBusyUntil?: number; 
+  busyReason?: string; 
   firstMessageTimestamp?: number;
-  pendingMessageIds?: string[]; // IDs des messages en attente de traitement
+  pendingMessageIds?: string[]; 
 }
