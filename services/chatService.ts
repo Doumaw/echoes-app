@@ -1,6 +1,22 @@
 import { getBusyDurationMs } from "@/services/phaseService";
 import { ParsedAIResponse } from "@/types/ParsedAIResponse";
-import { GameState } from "@/types/GameState";
+import { GameState, JuliePhase } from "@/types/GameState";
+
+export function getChatStatus(juliePhase: JuliePhase | undefined) {
+  if (!juliePhase) {
+    return "Problème de connexion";
+  }
+
+  if (
+    juliePhase === "asleep" ||
+    juliePhase === "busy" ||
+    juliePhase === "finalTwist"
+  ) {
+    return "Hors ligne";
+  }
+
+  return "En ligne";
+}
 
 export function canRequestAssistantReply(
   gameState: GameState | null | undefined,

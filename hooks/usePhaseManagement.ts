@@ -6,6 +6,7 @@ import {
 } from "@/constants/appConstants";
 import { createResetGameState } from "@/services/gameStateService";
 import { clearMessages, insertMessage } from "@/services/messageRepository";
+import { createMessage, createSystemMessages } from "@/services/messageService";
 import {
   getBusyDurationMs,
   getDemoSleepDurationMs,
@@ -38,14 +39,8 @@ export function usePhaseManagement(
       pendingMessageIds: [],
     });
 
-    for (const [index, text] of FINAL_TWIST_MESSAGES.entries()) {
-      await insertMessage(db, {
-        id: `${Date.now()}_${index}`,
-        text,
-        createdAt: Date.now() + index,
-        isUser: 0,
-        isIaRead: 1,
-      });
+    for (const message of createSystemMessages(FINAL_TWIST_MESSAGES)) {
+      await insertMessage(db, message);
     }
   }, [db, saveGameState]);
 
@@ -68,26 +63,22 @@ export function usePhaseManagement(
     });
 
     if (!hasPendingMessages) {
-      await insertMessage(db, {
-        id: `${Date.now()}_forced_awake`,
-        text: pickRandomMessage(BUSY_RETURN_MESSAGES),
-        createdAt: Date.now(),
-        isUser: 0,
-        isIaRead: 1,
-      });
+      await insertMessage(db, createMessage(
+        pickRandomMessage(BUSY_RETURN_MESSAGES),
+        false,
+        1,
+      ));
     }
   }, [db, gameState?.pendingMessageIds, saveGameState]);
 
   const forceSleep = useCallback(async () => {
     const now = Date.now();
     const forcedSleepDurationMs = getDemoSleepDurationMs();
-    await insertMessage(db, {
-      id: `${now}_sleep_manual`,
-      text: pickRandomMessage(SLEEP_START_MESSAGES),
-      createdAt: now,
-      isUser: 0,
-      isIaRead: 1,
-    });
+    await insertMessage(db, createMessage(
+      pickRandomMessage(SLEEP_START_MESSAGES),
+      false,
+      1,
+    ));
     await saveGameState({
       juliePhase: "asleep",
       julieWakeUpTime: now + forcedSleepDurationMs,
@@ -133,13 +124,11 @@ export function usePhaseManagement(
       });
 
       if (!gameState.pendingMessageIds || gameState.pendingMessageIds.length === 0) {
-        await insertMessage(db, {
-          id: `${Date.now()}_busy_return`,
-          text: pickRandomMessage(BUSY_RETURN_MESSAGES),
-          createdAt: Date.now(),
-          isUser: 0,
-          isIaRead: 1,
-        });
+        await insertMessage(db, createMessage(
+          pickRandomMessage(BUSY_RETURN_MESSAGES),
+          false,
+          1,
+        ));
       }
 
       return;
@@ -153,13 +142,11 @@ export function usePhaseManagement(
       });
 
       if (!gameState.pendingMessageIds || gameState.pendingMessageIds.length === 0) {
-        await insertMessage(db, {
-          id: `${Date.now()}_wake`,
-          text: pickRandomMessage(SLEEP_END_MESSAGES),
-          createdAt: Date.now(),
-          isUser: 0,
-          isIaRead: 1,
-        });
+        await insertMessage(db, createMessage(
+          pickRandomMessage(SLEEP_END_MESSAGES),
+          false,
+          1,
+        ));
       }
 
       return;
@@ -180,13 +167,11 @@ export function usePhaseManagement(
 
     if (shouldStartSleep(gameState, now)) {
       const wakeUpTime = now + getRandomSleepDurationMs();
-      await insertMessage(db, {
-        id: `${Date.now()}_sleep`,
-        text: pickRandomMessage(SLEEP_START_MESSAGES),
-        createdAt: Date.now(),
-        isUser: 0,
-        isIaRead: 1,
-      });
+      await insertMessage(db, createMessage(
+        pickRandomMessage(SLEEP_START_MESSAGES),
+        false,
+        1,
+      ));
 
       await saveGameState({
         juliePhase: "asleep",

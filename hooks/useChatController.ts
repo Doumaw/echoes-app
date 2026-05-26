@@ -3,23 +3,7 @@ import { useGameState } from "@/hooks/useGameState";
 import { useMessages } from "@/hooks/useMessages";
 import { usePhaseManagement } from "@/hooks/usePhaseManagement";
 import { getDemoCommandAction } from "@/services/demoCommandsService";
-import { shouldQueueForLater } from "@/services/chatService";
-
-function getChatStatus(juliePhase: string | undefined) {
-  if (!juliePhase) {
-    return "Problème de connexion";
-  }
-
-  if (
-    juliePhase === "asleep" ||
-    juliePhase === "busy" ||
-    juliePhase === "finalTwist"
-  ) {
-    return "Hors ligne";
-  }
-
-  return "En ligne";
-}
+import { getChatStatus, shouldQueueForLater } from "@/services/chatService";
 
 export function useChatController() {
   const introStartedRef = useRef(false);

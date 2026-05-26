@@ -10,6 +10,7 @@ import {
   insertMessage,
   markMessagesAsIaRead,
 } from "@/services/messageRepository";
+import { createMessage } from "@/services/messageService";
 import { GameState } from "@/types/GameState";
 import { Message } from "@/types/Message";
 import { useSQLiteContext } from "expo-sqlite";
@@ -41,13 +42,7 @@ export function useMessages() {
   }, [loadMessages]);
 
   const addMessage = useCallback(async (text: string, isUser: boolean, isIaRead: number = isUser ? 0 : 1) => {
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      text,
-      createdAt: Date.now(),
-      isUser: isUser ? 1 : 0,
-      isIaRead,
-    };
+    const newMessage = createMessage(text, isUser, isIaRead);
     await insertMessage(db, newMessage);
     setMessages((prev) => [newMessage, ...prev]);
     return newMessage;
