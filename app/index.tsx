@@ -9,7 +9,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 export default function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { gameState, loadState, isLoading } = useGameState();
+  const { gameState, loadState, isGameStateLoading } = useGameState();
   const { lastMessage, loadLastMessage } = useLastAssistantMessage();
 
   const currentTheme = getTheme(gameState?.theme ?? "dark");
@@ -22,7 +22,7 @@ export default function HomeScreen() {
     }, [loadState, loadLastMessage])
   );
 
-  if (isLoading || !gameState) {
+  if (isGameStateLoading || !gameState) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={currentTheme.colors.primary} />

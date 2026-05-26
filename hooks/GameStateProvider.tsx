@@ -22,7 +22,7 @@ interface Props {
 
 export function GameStateProvider({ children }: Props) {
   const [gameState, setGameState] = useState<GameState | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isGameStateLoading, setIsGameStateLoading] = useState(true);
 
   const loadState = useCallback(async () => {
     try {
@@ -32,7 +32,7 @@ export function GameStateProvider({ children }: Props) {
       console.error("Erreur lecture AsyncStorage", e);
       setGameState(createInitialGameState());
     } finally {
-      setIsLoading(false);
+      setIsGameStateLoading(false);
     }
   }, []);
 
@@ -52,8 +52,8 @@ export function GameStateProvider({ children }: Props) {
   }, [gameState]);
 
   const value = useMemo(
-    () => ({ gameState, isLoading, loadState, saveGameState }),
-    [gameState, isLoading, loadState, saveGameState],
+    () => ({ gameState, isGameStateLoading, loadState, saveGameState }),
+    [gameState, isGameStateLoading, loadState, saveGameState],
   );
 
   return (

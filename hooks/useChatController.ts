@@ -16,7 +16,7 @@ export function useChatController() {
     loadMessages,
     processPendingMessages,
   } = useMessages();
-  const { gameState, saveGameState, isLoading, loadState } = useGameState();
+  const { gameState, saveGameState, isGameStateLoading, loadState } = useGameState();
   const { triggerFinalTwist, resetGame, forceAwake, forceSleep, setBusy } = usePhaseManagement(
     gameState,
     saveGameState,
@@ -29,7 +29,7 @@ export function useChatController() {
     }
 
     if (
-      isLoading ||
+      isGameStateLoading ||
       !gameState ||
       isTyping ||
       introStartedRef.current
@@ -112,7 +112,7 @@ export function useChatController() {
 
   useEffect(() => {
     void runIntroIfNeeded();
-  }, [isLoading, gameState, isTyping, saveGameState, sendFirstSOS]);
+  }, [isGameStateLoading, gameState, isTyping, saveGameState, sendFirstSOS]);
 
   useEffect(() => {
     void processPendingMessagesIfNeeded();

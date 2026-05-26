@@ -26,12 +26,12 @@ export default function ChatScreen() {
     isInputDisabled,
     handleSend,
   } = useChatController();
-  const { gameState, isLoading } = useGameState();
+  const { gameState, isGameStateLoading } = useGameState();
 
   const currentTheme = getTheme(gameState?.theme ?? "dark");
   const styles = getStyles(currentTheme);
 
-  if (isLoading) {
+  if (isGameStateLoading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={currentTheme.colors.primary} />

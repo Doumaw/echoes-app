@@ -16,7 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 export default function SettingsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { gameState, saveGameState, isLoading } = useGameState();
+  const { gameState, saveGameState, isGameStateLoading } = useGameState();
   const [tempName, setTempName] = useState(gameState?.contactName ?? "");
 
   const currentTheme = getTheme(gameState?.theme ?? "dark");
@@ -28,7 +28,7 @@ export default function SettingsScreen() {
     }
   }, [gameState?.contactName]);
 
-  if (isLoading || !gameState) {
+  if (isGameStateLoading || !gameState) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={currentTheme.colors.primary} />
