@@ -10,8 +10,39 @@ function isAllowedDuration(value: number) {
   );
 }
 
+function parseJsonPayload(raw: unknown) {
+  if (typeof raw !== "string") {
+    return raw;
+  }
+
+  try {
+    return JSON.parse(raw);
+  } catch {
+  }
+
+  const withoutMarkdown = raw
+    .replace(/^```json\s*/i, "")
+    .replace(/^```\s*/i, "")
+    .replace(/```\s*$/i, "")
+    .trim();
+
+  try {
+    return JSON.parse(withoutMarkdown);
+  } catch {
+  }
+
+  const jsonStart = raw.indexOf("{");
+  const jsonEnd = raw.lastIndexOf("}");
+
+  if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+    return JSON.parse(raw.slice(jsonStart, jsonEnd + 1));
+  }
+
+  throw new Error("JSON IA introuvable");
+}
+
 export function parseAIResponse(raw: unknown): ParsedAIResponse {
-  const payload = typeof raw === "string" ? JSON.parse(raw) : raw;
+  const payload = parseJsonPayload(raw);
   const nextSituation = (payload as { next_situation?: unknown })?.next_situation ?? null;
 
   if (
