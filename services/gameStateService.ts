@@ -2,13 +2,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { GAME_STATE_STORAGE_KEY } from "@/constants/appConstants";
 import { GameState } from "@/types/GameState";
 
-export function createInitialGameState(
-  preserved?: Partial<Pick<GameState, "contactName" | "theme">>,
-): GameState {
+export function createInitialGameState(): GameState {
   return {
     hasSeenIntro: false,
-    contactName: preserved?.contactName || "Numéro Inconnu",
-    theme: preserved?.theme || "dark",
+    contactName: "Numéro Inconnu",
+    theme: "dark",
     iaStress: 10,
     iaTrust: 50,
     juliePhase: "awake",
@@ -20,13 +18,6 @@ export function createInitialGameState(
     firstMessageTimestamp: undefined,
     pendingMessageIds: [],
   };
-}
-
-export function createResetGameState(gameState: GameState | null) {
-  return createInitialGameState({
-    contactName: gameState?.contactName,
-    theme: gameState?.theme,
-  });
 }
 
 export async function loadStoredGameState() {

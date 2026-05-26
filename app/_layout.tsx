@@ -5,12 +5,12 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
 
-// On bloque l'écran d'accueil jusqu'a ce que l'init DB soit fait pour éviter des soucis UI
+// On garde écran de chargement jusqu'a ce que l'init DB soit fait pour éviter des soucis UI
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
 
-  // onInit est déclenché par le Provider UNE SEULE FOIS à l'ouverture de la DB
+  // onInit du SQLiteProvider est déclenché par le Provider UNE SEULE FOIS à l'ouverture de la DB
   // Il se comporte comme un useEffect avec un tableau vide [], inutile d'en rajouter un
   const handleDbInit = async (db: SQLiteDatabase) => {
     try {

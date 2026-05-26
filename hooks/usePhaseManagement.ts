@@ -4,7 +4,7 @@ import {
   SLEEP_END_MESSAGES,
   SLEEP_START_MESSAGES,
 } from "@/constants/appConstants";
-import { createResetGameState } from "@/services/gameStateService";
+import { createInitialGameState } from "@/services/gameStateService";
 import { clearMessages, insertMessage } from "@/services/messageRepository";
 import { createMessage, createSystemMessages } from "@/services/messageService";
 import {
@@ -46,8 +46,8 @@ export function usePhaseManagement(
 
   const resetGame = useCallback(async () => {
     await clearMessages(db);
-    await saveGameState(createResetGameState(gameState));
-  }, [db, gameState, saveGameState]);
+    await saveGameState(createInitialGameState());
+  }, [db, saveGameState]);
 
   const forceAwake = useCallback(async () => {
     const hasPendingMessages = Boolean(
