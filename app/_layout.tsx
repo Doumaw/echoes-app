@@ -14,9 +14,7 @@ export default function RootLayout() {
   // Il se comporte comme un useEffect avec un tableau vide [], inutile d'en rajouter un
   const handleDbInit = async (db: SQLiteDatabase) => {
     try {
-      console.log("Démarrage de la vérification SQLite...");
       await migrateDbIfNeeded(db);
-      console.log("SQLite prêt ! Libération de l'écran.");
     } catch (error) {
       console.error("Erreur critique d'initialisation DB:", error);
     } finally {

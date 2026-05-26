@@ -40,7 +40,7 @@ export function useMessages() {
     loadMessages();
   }, [loadMessages]);
 
-  const addMessage = async (text: string, isUser: boolean, isIaRead: number = isUser ? 0 : 1) => {
+  const addMessage = useCallback(async (text: string, isUser: boolean, isIaRead: number = isUser ? 0 : 1) => {
     const newMessage: Message = {
       id: Date.now().toString(),
       text,
@@ -51,7 +51,7 @@ export function useMessages() {
     await insertMessage(db, newMessage);
     setMessages((prev) => [newMessage, ...prev]);
     return newMessage;
-  };
+  }, [db]);
 
   const sendFirstSOS = useCallback(async () => {
     setIsTyping(true);
@@ -79,13 +79,6 @@ export function useMessages() {
     ) => {
       const parsedResponse = parseAIResponse(rawResponse);
 
-      console.log("[useMessages] IA Response (valid):", {
-        duration_minutes: parsedResponse.durationMinutes,
-        stress_change: parsedResponse.stressChange,
-        trust_change: parsedResponse.trustChange,
-        next_situation: parsedResponse.nextSituation,
-      });
-
       await saveGameState(buildAssistantStateUpdates(gameState, parsedResponse));
       await addMessage(parsedResponse.response, false, 1);
 
@@ -96,7 +89,7 @@ export function useMessages() {
     [addMessage, markAsIaReadAndRefresh],
   );
 
-  const getAIResponse = async (
+  const getAIResponse = useCallback(async (
     history: Message[],
     gameState: GameState,
     saveGameState?: (updates: Partial<GameState>) => Promise<void>,
@@ -134,9 +127,9 @@ export function useMessages() {
     } finally {
       setIsTyping(false);
     }
-  };
+  }, [addAssistantFallbackMessage, applyAssistantResponse, isTyping]);
 
-  const processPendingMessages = async (
+  const processPendingMessages = useCallback(async (
     pendingMessageIds: string[],
     gameState: GameState,
     saveGameState?: (updates: Partial<GameState>) => Promise<void>,
@@ -147,8 +140,6 @@ export function useMessages() {
     isProcessingPendingRef.current = true;
 
     try {
-      console.log(`[useMessages] Processing ${pendingMessageIds.length} pending messages`);
-
       const history = await buildHistoryFromDb();
       const didRespond = await getAIResponse(
         history,
@@ -168,7 +159,7 @@ export function useMessages() {
     } finally {
       isProcessingPendingRef.current = false;
     }
-  };
+  }, [buildHistoryFromDb, getAIResponse]);
 
   return {
     messages,

@@ -121,13 +121,11 @@ export function usePhaseManagement(
     const { juliePhase } = gameState;
 
     if (shouldTriggerFinalTwist(gameState, now)) {
-      console.log("[usePhaseManagement] Plot twist triggered!");
       await triggerFinalTwist();
       return;
     }
 
     if (shouldWakeFromBusy(gameState, now)) {
-      console.log("[usePhaseManagement] Busy ended, Julie is awake");
       await saveGameState({
         juliePhase: "awake",
         julieBusyUntil: undefined,
@@ -148,7 +146,6 @@ export function usePhaseManagement(
     }
 
     if (shouldWakeFromSleep(gameState, now)) {
-      console.log("[usePhaseManagement] Julie woke up");
       await saveGameState({
         juliePhase: "awake",
         julieWakeUpTime: undefined,
@@ -191,7 +188,6 @@ export function usePhaseManagement(
         isIaRead: 1,
       });
 
-      console.log("[usePhaseManagement] Julie is too tired, going to sleep");
       await saveGameState({
         juliePhase: "asleep",
         julieWakeUpTime: wakeUpTime,

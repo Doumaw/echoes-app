@@ -10,8 +10,6 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
   const currentDbVersion = result?.user_version ?? 0;
 
   if (currentDbVersion === 0) {
-    console.log("Initialisation de la base de données SQLite (v1)...");
-
     await db.execAsync(`
       CREATE TABLE IF NOT EXISTS messages (
         id TEXT PRIMARY KEY NOT NULL,
