@@ -157,9 +157,8 @@ export function useChatController() {
   return {
     messages,
     isTyping,
-    isLoading,
     status: getChatStatus(gameState?.juliePhase),
-    contactName: gameState?.contactName || "Petit problème",
+    contactName: gameState?.contactName ?? "Numéro Inconnu",
     isInputDisabled: false,
     handleSend,
   };

@@ -12,7 +12,7 @@ export default function HomeScreen() {
   const { gameState, loadState, isLoading } = useGameState();
   const { lastMessage, loadLastMessage } = useLastAssistantMessage();
 
-  const currentTheme = getTheme(gameState?.theme || "dark");
+  const currentTheme = getTheme(gameState?.theme ?? "dark");
   const styles = getStyles(currentTheme);
 
   useFocusEffect(
@@ -56,7 +56,7 @@ export default function HomeScreen() {
 
           <View style={styles.chatInfo}>
             <Text style={styles.contactName}>
-              {gameState?.contactName || "Petit problème"}
+              {gameState.contactName}
             </Text>
             <Text style={styles.lastMessage} numberOfLines={1}>
               {lastMessage?.text || "Aucun message"}

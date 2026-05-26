@@ -21,15 +21,14 @@ export default function ChatScreen() {
   const {
     messages,
     isTyping,
-    isLoading,
     status,
     contactName,
     isInputDisabled,
     handleSend,
   } = useChatController();
-  const { gameState } = useGameState();
+  const { gameState, isLoading } = useGameState();
 
-  const currentTheme = getTheme(gameState?.theme || "dark");
+  const currentTheme = getTheme(gameState?.theme ?? "dark");
   const styles = getStyles(currentTheme);
 
   if (isLoading) {
