@@ -14,6 +14,7 @@ import { ChatInput } from "@/components/ChatInput";
 import { MessageBubble } from "@/components/MessageBubble";
 import { AppTheme, getTheme } from "@/constants/theme";
 import { useChatController } from "@/hooks/useChatController";
+import { useGameState } from "@/hooks/useGameState";
 
 export default function ChatScreen() {
   const insets = useSafeAreaInsets();
@@ -21,14 +22,14 @@ export default function ChatScreen() {
     messages,
     isTyping,
     isLoading,
-    themeMode,
     status,
     contactName,
     isInputDisabled,
     handleSend,
   } = useChatController();
+  const { gameState } = useGameState();
 
-  const currentTheme = getTheme(themeMode);
+  const currentTheme = getTheme(gameState?.theme || "dark");
   const styles = getStyles(currentTheme);
 
   if (isLoading) {

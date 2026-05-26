@@ -158,7 +158,6 @@ export function useChatController() {
     messages,
     isTyping,
     isLoading,
-    themeMode: gameState?.theme || "dark",
     status: getChatStatus(gameState?.juliePhase),
     contactName: gameState?.contactName || "Petit problème",
     isInputDisabled: false,
