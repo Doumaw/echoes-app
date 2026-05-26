@@ -1,6 +1,6 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { GAME_STATE_STORAGE_KEY } from "@/constants/appConstants";
 import { GameState } from "@/types/GameState";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export function createInitialGameState(): GameState {
   return {
@@ -39,11 +39,8 @@ export async function saveStoredGameState(
     return null;
   }
 
-  const nextState = { ...currentState, ...updates };
-  await AsyncStorage.setItem(
-    GAME_STATE_STORAGE_KEY,
-    JSON.stringify(nextState),
-  );
+  const nextState = { ...currentState, ...updates }; // Sptread operator pour fusionner les objets en gardant les propriétés de currentState et en écrasant celles qui sont dans updates (Merci le Partial)
+  await AsyncStorage.setItem(GAME_STATE_STORAGE_KEY, JSON.stringify(nextState));
 
   return nextState;
 }

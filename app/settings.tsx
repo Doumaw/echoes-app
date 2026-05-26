@@ -17,9 +17,9 @@ export default function SettingsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { gameState, saveGameState, isLoading } = useGameState();
-  const [tempName, setTempName] = useState(gameState?.contactName || "");
+  const [tempName, setTempName] = useState(gameState?.contactName ?? "");
 
-  const currentTheme = getTheme(gameState?.theme || "dark");
+  const currentTheme = getTheme(gameState?.theme ?? "dark");
   const styles = getStyles(currentTheme);
 
   useEffect(() => {
@@ -37,7 +37,7 @@ export default function SettingsScreen() {
   }
 
   const handleSave = async () => {
-    await saveGameState({ contactName: tempName.trim() || gameState.contactName });
+    await saveGameState({ contactName: tempName.trim() || gameState.contactName }); // Sichamp est vide on garde l'ancien nom
     router.back();
   };
 
