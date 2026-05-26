@@ -1,4 +1,5 @@
 import { useGameState } from "@/hooks/useGameState";
+import { useIntroMessage } from "@/hooks/useIntroMessage";
 import { useLastAssistantMessage } from "@/hooks/useLastAssistantMessage";
 import { AppTheme, getTheme } from "@/constants/theme";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -11,6 +12,8 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { gameState, loadState, isGameStateLoading } = useGameState();
   const { lastMessage, loadLastMessage } = useLastAssistantMessage();
+
+  useIntroMessage({ onIntroSent: loadLastMessage });
 
   const currentTheme = getTheme(gameState?.theme ?? "dark");
   const styles = getStyles(currentTheme);

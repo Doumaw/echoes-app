@@ -61,7 +61,7 @@ export default function ChatScreen() {
           )}
           contentContainerStyle={styles.listContent}
           inverted
-          ListHeaderComponent={
+          ListHeaderComponent={ // Flatlist inversée dans ca se met nickel au dessus de l'input
             isTyping ? (
               <Text style={styles.typingHint}>
                 En train d&apos;écrire...

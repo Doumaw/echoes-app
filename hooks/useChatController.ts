@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useGameState } from "@/hooks/useGameState";
 import { useMessages } from "@/hooks/useMessages";
 import { usePhaseManagement } from "@/hooks/usePhaseManagement";
@@ -6,47 +6,19 @@ import { getDemoCommandAction } from "@/services/demoCommandsService";
 import { getChatStatus, shouldQueueForLater } from "@/services/chatService";
 
 export function useChatController() {
-  const introStartedRef = useRef(false);
   const {
     messages,
     isTyping,
     sendMessage,
-    sendFirstSOS,
     getAIResponse,
     loadMessages,
     processPendingMessages,
   } = useMessages();
-  const { gameState, saveGameState, isGameStateLoading, loadState } = useGameState();
+  const { gameState, saveGameState, loadState } = useGameState();
   const { triggerFinalTwist, resetGame, forceAwake, forceSleep, setBusy } = usePhaseManagement(
     gameState,
     saveGameState,
   );
-
-  const runIntroIfNeeded = async () => {
-    if (gameState?.hasSeenIntro) {
-      introStartedRef.current = false;
-      return;
-    }
-
-    if (
-      isGameStateLoading ||
-      !gameState ||
-      isTyping ||
-      introStartedRef.current
-    ) {
-      return;
-    }
-
-    introStartedRef.current = true;
-
-    const firstMessageTimestamp = Date.now();
-    await saveGameState({
-      hasSeenIntro: true,
-      firstMessageTimestamp,
-    });
-
-    await sendFirstSOS();
-  };
 
   const processPendingMessagesIfNeeded = async () => {
     if (
@@ -109,10 +81,6 @@ export function useChatController() {
 
     return false;
   };
-
-  useEffect(() => {
-    void runIntroIfNeeded();
-  }, [isGameStateLoading, gameState, isTyping, saveGameState, sendFirstSOS]);
 
   useEffect(() => {
     void processPendingMessagesIfNeeded();
