@@ -20,6 +20,30 @@ npm install
 npx expo start
 ```
 
+## Configuration
+
+Ce projet utilise OpenRouter pour générer les réponses de Julie.
+
+Crée un fichier `.env` à la racine du projet avec ta clé API OpenRouter :
+
+```env
+EXPO_PUBLIC_OPENROUTER_KEY=ta_cle_openrouter
+```
+
+Tu peux partir du modèle fourni :
+
+```bash
+cp .env.example .env
+```
+
+Sous Windows PowerShell :
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Le fichier `.env` contient une clé privée locale. Il ne doit jamais être partagé ni commit.
+
 ## Structure du projet
 
 - `app/` : écrans
