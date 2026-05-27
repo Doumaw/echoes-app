@@ -3,11 +3,7 @@ import { useMessages } from "@/hooks/useMessages";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useRef } from "react";
 
-interface Options {
-  onIntroSent?: () => Promise<void> | void;
-}
-
-export function useIntroMessage({ onIntroSent }: Options = {}) {
+export function useIntroMessage() {
   const introStartedRef = useRef(false);
   const { gameState, saveGameState, isGameStateLoading } = useGameState();
   const { isTyping, sendFirstSOS } = useMessages();
@@ -36,12 +32,10 @@ export function useIntroMessage({ onIntroSent }: Options = {}) {
     });
 
     await sendFirstSOS();
-    await onIntroSent?.();
   }, [
     gameState,
     isGameStateLoading,
     isTyping,
-    onIntroSent,
     saveGameState,
     sendFirstSOS,
   ]);
