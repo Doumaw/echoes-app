@@ -51,7 +51,7 @@ export function parseAIResponse(raw: unknown): ParsedAIResponse {
 
   if ( // Si un seul est faux on throw
     typeof payload !== "object" ||
-    payload === null ||
+    payload === null || // Car typeof null est "object" en JS
     typeof (payload as { stress_change?: unknown }).stress_change !== "number" ||
     typeof (payload as { trust_change?: unknown }).trust_change !== "number" ||
     typeof (payload as { response?: unknown }).response !== "string" ||
