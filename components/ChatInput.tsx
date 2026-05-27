@@ -4,16 +4,14 @@ import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 interface Props {
   onSend: (text: string) => void;
-  disabled?: boolean;
   theme: AppTheme;
 }
 
-export function ChatInput({ onSend, disabled, theme }: Props) {
+export function ChatInput({ onSend, theme }: Props) {
   const [text, setText] = useState("");
   const styles = getStyles(theme);
 
-  // Logique d'activation
-  const canSend = text.trim().length > 0 && !disabled;
+  const canSend = text.trim().length > 0;
 
   const handleSend = () => {
     if (!canSend) return;
@@ -30,7 +28,6 @@ export function ChatInput({ onSend, disabled, theme }: Props) {
         value={text}
         onChangeText={setText}
         multiline
-        editable={!disabled}
       />
 
       <Pressable
