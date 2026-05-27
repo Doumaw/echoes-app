@@ -13,7 +13,7 @@ export default function HomeScreen() {
   const { gameState, loadState, isGameStateLoading } = useGameState();
   const { lastMessage, loadLastMessage } = useLastAssistantMessage();
 
-  useIntroMessage();
+  useIntroMessage(loadLastMessage);
 
   const currentTheme = getTheme(gameState?.theme ?? "dark");
   const styles = getStyles(currentTheme);
