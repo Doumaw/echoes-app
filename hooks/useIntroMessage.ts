@@ -1,6 +1,7 @@
 import { useGameState } from "@/hooks/useGameState";
 import { useMessages } from "@/hooks/useMessages";
-import { useCallback, useEffect, useRef } from "react";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useRef } from "react";
 
 interface Options {
   onIntroSent?: () => Promise<void> | void;
@@ -45,7 +46,9 @@ export function useIntroMessage({ onIntroSent }: Options = {}) {
     sendFirstSOS,
   ]);
 
-  useEffect(() => {
-    void runIntroIfNeeded();
-  }, [runIntroIfNeeded]);
+  useFocusEffect(
+    useCallback(() => {
+      void runIntroIfNeeded();
+    }, [runIntroIfNeeded]),
+  );
 }

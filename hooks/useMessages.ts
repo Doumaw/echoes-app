@@ -109,14 +109,14 @@ export function useMessages() {
       } catch (parseErr) {
         console.error("Erreur parsing JSON IA:", parseErr);
         await addAssistantFallbackMessage(
-          "Erreur du réseau PARSER",
+          "Julie a marmonné dans sa barbe... (réponse illisible)",
         );
         return false;
       }
     } catch (e) {
       console.error(e);
       await addAssistantFallbackMessage(
-        "Le signal est trop faible, je ne reçois rien... tu es la?",
+        "Le signal est trop faible, je ne reçois rien...",
       );
       return false;
     } finally {

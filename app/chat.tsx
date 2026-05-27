@@ -15,20 +15,22 @@ import { MessageBubble } from "@/components/MessageBubble";
 import { AppTheme, getTheme } from "@/constants/theme";
 import { useChatController } from "@/hooks/useChatController";
 import { useGameState } from "@/hooks/useGameState";
+import { getChatStatus } from "@/services/chatService";
+import { useRouter } from "expo-router";
 
 export default function ChatScreen() {
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const {
     messages,
     isTyping,
-    status,
-    contactName,
-    isInputDisabled,
     handleSend,
   } = useChatController();
   const { gameState, isGameStateLoading } = useGameState();
 
   const currentTheme = getTheme(gameState?.theme ?? "dark");
+  const contactName = gameState?.contactName ?? "Numéro Inconnu";
+  const status = getChatStatus(gameState?.juliePhase);
   const styles = getStyles(currentTheme);
 
   if (isGameStateLoading) {
@@ -46,7 +48,12 @@ export default function ChatScreen() {
         { paddingTop: insets.top, paddingBottom: insets.bottom },
       ]}
     >
-      <ChatHeader name={contactName} status={status} theme={currentTheme} />
+      <ChatHeader
+        name={contactName}
+        status={status}
+        theme={currentTheme}
+        onBack={() => router.back()}
+      />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -72,7 +79,6 @@ export default function ChatScreen() {
 
         <ChatInput
           onSend={handleSend}
-          disabled={isInputDisabled}
           theme={currentTheme}
         />
       </KeyboardAvoidingView>

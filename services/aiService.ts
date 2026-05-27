@@ -37,7 +37,7 @@ export const aiService = {
 
     const data = await response.json();
     return (
-      data.choices[0]?.message?.content ||
+      data.choices?.[0]?.message?.content ||
       "Tu es la??? Je ne reçois aucun message..."
     );
   },
