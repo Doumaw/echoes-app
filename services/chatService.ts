@@ -26,7 +26,7 @@ export function canRequestAssistantReply(
     return false;
   }
 
-  return (
+  return ( // return true seulement si Julie n'est dans aucun de ces etats
     gameState.juliePhase !== "asleep" &&
     gameState.juliePhase !== "busy" &&
     gameState.juliePhase !== "finalTwist"

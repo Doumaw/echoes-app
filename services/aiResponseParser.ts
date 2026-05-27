@@ -15,11 +15,14 @@ function parseJsonPayload(raw: unknown) {
     return raw;
   }
 
+  // On tente de parser directement
   try {
     return JSON.parse(raw);
-  } catch {
+  } 
+  catch {
   }
 
+  // On nettoie les markdown et on retente de parser
   const withoutMarkdown = raw
     .replace(/^```json\s*/i, "")
     .replace(/^```\s*/i, "")
@@ -31,6 +34,7 @@ function parseJsonPayload(raw: unknown) {
   } catch {
   }
 
+  // On tentre une 3e fois en cherchant a isoler un texte entre {} qui serait le JSON
   const jsonStart = raw.indexOf("{");
   const jsonEnd = raw.lastIndexOf("}");
 
@@ -45,7 +49,7 @@ export function parseAIResponse(raw: unknown): ParsedAIResponse {
   const payload = parseJsonPayload(raw);
   const nextSituation = (payload as { next_situation?: unknown })?.next_situation ?? null;
 
-  if (
+  if ( // Si un seul est faux on throw
     typeof payload !== "object" ||
     payload === null ||
     typeof (payload as { stress_change?: unknown }).stress_change !== "number" ||
