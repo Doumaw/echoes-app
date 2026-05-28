@@ -15,7 +15,23 @@ import { MessageBubble } from "@/components/MessageBubble";
 import { AppTheme, getTheme } from "@/constants/theme";
 import { useChat } from "@/hooks/useChat";
 import { useGameState } from "@/hooks/useGameState";
-import { getChatStatus } from "@/services/gameRulesService";
+import { JuliePhase } from "@/types/GameState";
+
+function getChatStatus(juliePhase: JuliePhase | undefined) {
+  if (!juliePhase) {
+    return "Problème de connexion";
+  }
+
+  if (
+    juliePhase === "asleep" ||
+    juliePhase === "busy" ||
+    juliePhase === "finalTwist"
+  ) {
+    return "Hors ligne";
+  }
+
+  return "En ligne";
+}
 
 export default function ChatScreen() {
   const insets = useSafeAreaInsets();

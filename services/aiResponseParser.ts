@@ -1,8 +1,20 @@
 import {
-  isAllowedAiDuration,
-  isAllowedAiNextSituation,
-} from "@/services/gameRulesService";
+  ALLOWED_AI_DURATIONS,
+  ALLOWED_AI_NEXT_SITUATIONS,
+} from "@/constants/appConstants";
 import { ParsedAIResponse } from "@/types/ParsedAIResponse";
+
+function isAllowedDuration(value: number) {
+  return ALLOWED_AI_DURATIONS.includes(
+    value as (typeof ALLOWED_AI_DURATIONS)[number],
+  );
+}
+
+function isAllowedNextSituation(value: unknown) {
+  return ALLOWED_AI_NEXT_SITUATIONS.includes(
+    value as (typeof ALLOWED_AI_NEXT_SITUATIONS)[number],
+  );
+}
 
 function parseJsonPayload(raw: unknown) {
   if (typeof raw !== "string") {
@@ -54,14 +66,14 @@ export function parseAIResponse(raw: unknown): ParsedAIResponse {
     throw new Error("Format inattendu");
   }
 
-  if (!isAllowedAiDuration((payload as { duration_minutes: number }).duration_minutes)) {
+  if (!isAllowedDuration((payload as { duration_minutes: number }).duration_minutes)) {
     throw new Error(
       `Durée invalide: ${(payload as { duration_minutes: number }).duration_minutes}`,
     );
   }
 
   if (
-    !isAllowedAiNextSituation(nextSituation)
+    !isAllowedNextSituation(nextSituation)
   ) {
     throw new Error(`Situation invalide: ${String(nextSituation)}`);
   }

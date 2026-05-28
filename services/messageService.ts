@@ -31,3 +31,8 @@ export function createSystemMessages(texts: string[]): Message[] {
     isIaRead: 1,
   }));
 }
+
+export function createRandomAssistantMessage(texts: string[]): Message {
+  const text = texts[Math.floor(Math.random() * texts.length)];
+  return createMessage(text, false, 1);
+}

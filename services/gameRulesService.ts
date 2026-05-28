@@ -1,6 +1,4 @@
 import {
-  ALLOWED_AI_DURATIONS,
-  ALLOWED_AI_NEXT_SITUATIONS,
   DEMO_SLEEP_DURATION_MS,
   FIRST_SLEEP_AFTER_MS,
   MINUTE_MS,
@@ -11,23 +9,7 @@ import {
   SLEEP_DURATION_MIN_MS,
 } from "@/constants/appConstants";
 import { ParsedAIResponse } from "@/types/ParsedAIResponse";
-import { GameState, JuliePhase } from "@/types/GameState";
-
-export function getChatStatus(juliePhase: JuliePhase | undefined) {
-  if (!juliePhase) {
-    return "Problème de connexion";
-  }
-
-  if (
-    juliePhase === "asleep" ||
-    juliePhase === "busy" ||
-    juliePhase === "finalTwist"
-  ) {
-    return "Hors ligne";
-  }
-
-  return "En ligne";
-}
+import { GameState } from "@/types/GameState";
 
 export function canRequestAssistantReply(
   gameState: GameState | null | undefined,
@@ -81,10 +63,6 @@ export function buildAssistantStateUpdates(
 
 export function shouldQueueForLater(gameState: GameState) {
   return gameState.juliePhase === "busy" || gameState.juliePhase === "asleep";
-}
-
-export function pickRandomMessage(messages: string[]) {
-  return messages[Math.floor(Math.random() * messages.length)];
 }
 
 export function getRandomSleepDurationMs() {
@@ -145,17 +123,5 @@ export function shouldStartSleep(gameState: GameState, now: number) {
       gameState.nextSleepAt &&
       now >= gameState.nextSleepAt &&
       (!gameState.pendingMessageIds || gameState.pendingMessageIds.length === 0),
-  );
-}
-
-export function isAllowedAiDuration(value: number) {
-  return ALLOWED_AI_DURATIONS.includes(
-    value as (typeof ALLOWED_AI_DURATIONS)[number],
-  );
-}
-
-export function isAllowedAiNextSituation(value: unknown) {
-  return ALLOWED_AI_NEXT_SITUATIONS.includes(
-    value as (typeof ALLOWED_AI_NEXT_SITUATIONS)[number],
   );
 }
