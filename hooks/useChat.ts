@@ -220,7 +220,7 @@ export function useChat() {
     }
 
     const userMessage = await addMessage(messageText, true, 0);
-
+    // Vérification si Julie peut répondre immédiatement ou pas
     if (isTyping || shouldQueueForLater(gameState)) {
       const currentPending = gameState.pendingMessageIds || [];
       await saveGameState({
@@ -228,7 +228,7 @@ export function useChat() {
       });
       return;
     }
-
+    
     void requestAssistantReply(
       [userMessage, ...messages],
       gameState,

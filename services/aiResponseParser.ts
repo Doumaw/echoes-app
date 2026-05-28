@@ -55,7 +55,7 @@ function extractJsonPayload(rawAIResponse: unknown) {
     return directPayload;
   }
 
-  // On retente avec un texte nettoyé.
+  // On retente avec un texte nettoyé
   const withoutMarkdown = rawAIResponse
     .replace(/^```json\s*/i, "")
     .replace(/^```\s*/i, "")
@@ -67,7 +67,7 @@ function extractJsonPayload(rawAIResponse: unknown) {
     return markdownPayload;
   }
 
-  // On retente en isolant le JSON entre accolades.
+  // On retente en isolant le JSON entre accolades
   const jsonStart = rawAIResponse.indexOf("{");
   const jsonEnd = rawAIResponse.lastIndexOf("}");
 
@@ -86,7 +86,7 @@ function extractJsonPayload(rawAIResponse: unknown) {
 export function parseAIResponse(rawAIResponse: unknown): ParsedAIResponse {
   const payload = extractJsonPayload(rawAIResponse);
 
-  // Si un champ obligatoire manque ou a un mauvais type, la réponse est invalide.
+  // Si un champ obligatoire manque ou a un mauvais type, la réponse est invalide
   if (!isAIResponsePayload(payload)) {
     throw new Error("Format inattendu");
   }
