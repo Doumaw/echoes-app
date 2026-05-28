@@ -30,14 +30,11 @@ export function useChat() {
     saveGameState,
   );
 
+  // Messages
   const loadMessages = useCallback(async () => {
     const result = await getAllMessages(db);
     setMessages(result);
   }, [db]);
-
-  useEffect(() => {
-    void loadMessages();
-  }, [loadMessages]);
 
   const addMessage = useCallback(async (text: string, isUser: boolean, isIaRead: number = isUser ? 0 : 1) => {
     const newMessage = createMessage(text, isUser, isIaRead);
@@ -64,6 +61,7 @@ export function useChat() {
     [addMessage],
   );
 
+  // Réponses de Julie
   const applyAssistantResponse = useCallback(
     async (
       rawResponse: unknown,
@@ -115,6 +113,7 @@ export function useChat() {
     }
   }, [addAssistantFallbackMessage, applyAssistantResponse, isTyping]);
 
+  // Messages en attente
   const processPendingMessages = useCallback(async (
     pendingMessageIds: string[],
     currentGameState: GameState,
@@ -146,6 +145,7 @@ export function useChat() {
     }
   }, [db, requestAssistantReply, saveGameState]);
 
+  // Commandes de démonstration
   const handleDemoCommandIfNeeded = useCallback(async (text: string) => {
     const demoCommandAction = getDemoCommandAction(text);
 
@@ -182,6 +182,11 @@ export function useChat() {
     return false;
   }, [forceAwake, forceSleep, loadMessages, loadState, resetGame, setBusy, triggerFinalTwist]);
 
+  // Effets automatiques
+  useEffect(() => {
+    void loadMessages();
+  }, [loadMessages]);
+
   useEffect(() => {
     if (
       isTyping ||
@@ -204,6 +209,7 @@ export function useChat() {
     }
   }, [gameState?.juliePhase, gameState?.pendingMessageIds, loadMessages]);
 
+  // Action publique
   const handleSend = useCallback(async (text: string) => {
     if (!gameState) return;
 

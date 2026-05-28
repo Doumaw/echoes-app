@@ -4,6 +4,7 @@ import {
 } from "@/constants/appConstants";
 import { ParsedAIResponse } from "@/types/ParsedAIResponse";
 
+// Validation du contrat IA
 function isAllowedDuration(value: number) {
   return ALLOWED_AI_DURATIONS.includes(
     value as (typeof ALLOWED_AI_DURATIONS)[number],
@@ -16,6 +17,7 @@ function isAllowedNextSituation(value: unknown) {
   );
 }
 
+// Extraction JSON
 function parseJsonPayload(raw: unknown) {
   if (typeof raw !== "string") {
     return raw;
@@ -51,6 +53,7 @@ function parseJsonPayload(raw: unknown) {
   throw new Error("JSON IA introuvable");
 }
 
+// Conversion en réponse utilisable par le jeu
 export function parseAIResponse(raw: unknown): ParsedAIResponse {
   const payload = parseJsonPayload(raw);
   const nextSituation = (payload as { next_situation?: unknown })?.next_situation ?? null;

@@ -11,6 +11,7 @@ import {
 import { ParsedAIResponse } from "@/types/ParsedAIResponse";
 import { GameState } from "@/types/GameState";
 
+// Règles de réponse
 export function canRequestAssistantReply(
   gameState: GameState | null | undefined,
   isTyping: boolean,
@@ -65,6 +66,7 @@ export function shouldQueueForLater(gameState: GameState) {
   return gameState.juliePhase === "busy" || gameState.juliePhase === "asleep";
 }
 
+// Calculs de temps
 export function getRandomSleepDurationMs() {
   return (
     SLEEP_DURATION_MIN_MS +
@@ -92,6 +94,7 @@ export function getBusyDurationMs(durationMinutes: number) {
   return durationMinutes * MINUTE_MS;
 }
 
+// Conditions de transition
 export function shouldTriggerFinalTwist(gameState: GameState, now: number) {
   return Boolean(
     gameState.firstMessageTimestamp &&

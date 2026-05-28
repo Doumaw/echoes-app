@@ -29,6 +29,11 @@ export function usePhaseManagement(
   const db = useSQLiteContext();
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const addRandomAssistantMessage = useCallback(async (texts: string[]) => {
+    await insertMessage(db, createRandomAssistantMessage(texts));
+  }, [db]);
+
+  // Actions forcées
   const triggerFinalTwist = useCallback(async () => {
     await saveGameState({
       juliePhase: "finalTwist",
@@ -62,14 +67,14 @@ export function usePhaseManagement(
     });
 
     if (!hasPendingMessages) {
-      await insertMessage(db, createRandomAssistantMessage(BUSY_RETURN_MESSAGES));
+      await addRandomAssistantMessage(BUSY_RETURN_MESSAGES);
     }
-  }, [db, gameState?.pendingMessageIds, saveGameState]);
+  }, [addRandomAssistantMessage, gameState?.pendingMessageIds, saveGameState]);
 
   const forceSleep = useCallback(async () => {
     const now = Date.now();
     const forcedSleepDurationMs = getDemoSleepDurationMs();
-    await insertMessage(db, createRandomAssistantMessage(SLEEP_START_MESSAGES));
+    await addRandomAssistantMessage(SLEEP_START_MESSAGES);
     await saveGameState({
       juliePhase: "asleep",
       julieWakeUpTime: now + forcedSleepDurationMs,
@@ -77,7 +82,7 @@ export function usePhaseManagement(
       julieBusyUntil: undefined,
       busyReason: undefined,
     });
-  }, [db, saveGameState]);
+  }, [addRandomAssistantMessage, saveGameState]);
 
   const setBusy = useCallback(
     async (durationMinutes: number, reason?: string) => {
@@ -96,6 +101,7 @@ export function usePhaseManagement(
     [gameState, saveGameState],
   );
 
+  // Transitions automatiques
   const checkPhaseTransitions = useCallback(async () => {
     if (!gameState) return;
 
@@ -115,7 +121,7 @@ export function usePhaseManagement(
       });
 
       if (!gameState.pendingMessageIds || gameState.pendingMessageIds.length === 0) {
-        await insertMessage(db, createRandomAssistantMessage(BUSY_RETURN_MESSAGES));
+        await addRandomAssistantMessage(BUSY_RETURN_MESSAGES);
       }
 
       return;
@@ -129,7 +135,7 @@ export function usePhaseManagement(
       });
 
       if (!gameState.pendingMessageIds || gameState.pendingMessageIds.length === 0) {
-        await insertMessage(db, createRandomAssistantMessage(SLEEP_END_MESSAGES));
+        await addRandomAssistantMessage(SLEEP_END_MESSAGES);
       }
 
       return;
@@ -150,7 +156,7 @@ export function usePhaseManagement(
 
     if (shouldStartSleep(gameState, now)) {
       const wakeUpTime = now + getRandomSleepDurationMs();
-      await insertMessage(db, createRandomAssistantMessage(SLEEP_START_MESSAGES));
+      await addRandomAssistantMessage(SLEEP_START_MESSAGES);
 
       await saveGameState({
         juliePhase: "asleep",
@@ -159,8 +165,9 @@ export function usePhaseManagement(
       });
       return;
     }
-  }, [db, gameState, saveGameState, triggerFinalTwist]);
+  }, [addRandomAssistantMessage, gameState, saveGameState, triggerFinalTwist]);
 
+  // Minuteur de vérification
   useEffect(() => {
     checkPhaseTransitions();
 
