@@ -1,7 +1,7 @@
 import { FIRST_IA_MESSAGE } from "@/constants/appConstants";
 import { useGameState } from "@/hooks/useGameState";
 import { insertMessage } from "@/services/messageRepository";
-import { createMessage } from "@/services/messageService";
+import { createAssistantMessage } from "@/services/messageService";
 import { useFocusEffect } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useRef } from "react";
@@ -33,7 +33,7 @@ export function useIntroMessage(loadLastMessage: () => Promise<void>) {
       firstMessageTimestamp,
     });
 
-    await insertMessage(db, createMessage(FIRST_IA_MESSAGE, false, 1));
+    await insertMessage(db, createAssistantMessage(FIRST_IA_MESSAGE));
     await loadLastMessage();
   }, [
     db,

@@ -240,6 +240,5 @@ export function useChat() {
     messages,
     isTyping,
     handleSend,
-    loadMessages,
   };
 }

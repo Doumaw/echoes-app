@@ -32,7 +32,6 @@ export function createSystemMessages(texts: string[]): Message[] {
   }));
 }
 
-export function createRandomAssistantMessage(texts: string[]): Message {
-  const text = texts[Math.floor(Math.random() * texts.length)];
+export function createAssistantMessage(text: string): Message {
   return createMessage(text, false, 1);
 }

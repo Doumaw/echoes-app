@@ -17,7 +17,7 @@ import {
   shouldWakeFromSleep,
 } from "@/services/gameRulesService";
 import { clearMessages, insertMessage } from "@/services/messageRepository";
-import { createRandomAssistantMessage, createSystemMessages } from "@/services/messageService";
+import { createAssistantMessage, createSystemMessages } from "@/services/messageService";
 import { GameState } from "@/types/GameState";
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useEffect, useRef } from "react";
@@ -30,7 +30,8 @@ export function usePhaseManagement(
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const addRandomAssistantMessage = useCallback(async (texts: string[]) => {
-    await insertMessage(db, createRandomAssistantMessage(texts));
+    const text = texts[Math.floor(Math.random() * texts.length)];
+    await insertMessage(db, createAssistantMessage(text));
   }, [db]);
 
   // Actions forcées
