@@ -5,6 +5,7 @@ import { parseAIResponse } from "@/services/aiResponseParser";
 import { getDemoCommandAction } from "@/services/demoCommandsService";
 import {
   buildAssistantStateUpdates,
+  hasPendingMessages,
   isJulieAvailable,
   shouldQueueForLater,
 } from "@/services/gameRulesService";
@@ -193,19 +194,18 @@ export function useChat() {
     if (
       isTyping ||
       gameState?.juliePhase !== "awake" ||
-      !gameState.pendingMessageIds ||
-      gameState.pendingMessageIds.length === 0
+      !hasPendingMessages(gameState)
     ) {
       return;
     }
 
-    void processPendingMessages(gameState.pendingMessageIds, gameState);
+    void processPendingMessages(gameState.pendingMessageIds ?? [], gameState);
   }, [gameState, isTyping, processPendingMessages]);
 
   useEffect(() => {
     if (
       gameState?.juliePhase === "awake" &&
-      (!gameState.pendingMessageIds || gameState.pendingMessageIds.length === 0)
+      !hasPendingMessages(gameState)
     ) {
       void loadMessages();
     }

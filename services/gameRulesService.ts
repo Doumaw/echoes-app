@@ -63,6 +63,10 @@ export function shouldQueueForLater(gameState: GameState) {
   return gameState.juliePhase === "busy" || gameState.juliePhase === "asleep";
 }
 
+export function hasPendingMessages(gameState: GameState) {
+  return Boolean(gameState.pendingMessageIds?.length);
+}
+
 // Calculs de temps
 export function getRandomSleepDurationMs() {
   return (
@@ -122,6 +126,6 @@ export function shouldStartSleep(gameState: GameState, now: number) {
       gameState.juliePhase === "awake" &&
       gameState.nextSleepAt &&
       now >= gameState.nextSleepAt &&
-      (!gameState.pendingMessageIds || gameState.pendingMessageIds.length === 0),
+      !hasPendingMessages(gameState),
   );
 }
