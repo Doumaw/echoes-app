@@ -12,11 +12,8 @@ import { ParsedAIResponse } from "@/types/ParsedAIResponse";
 import { GameState } from "@/types/GameState";
 
 // Règles de réponse
-export function canRequestAssistantReply(
-  gameState: GameState | null | undefined,
-  isTyping: boolean,
-) {
-  if (isTyping || !gameState) {
+export function isJulieAvailable(gameState: GameState | null | undefined) {
+  if (!gameState) {
     return false;
   }
 

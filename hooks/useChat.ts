@@ -5,7 +5,7 @@ import { parseAIResponse } from "@/services/aiResponseParser";
 import { getDemoCommandAction } from "@/services/demoCommandsService";
 import {
   buildAssistantStateUpdates,
-  canRequestAssistantReply,
+  isJulieAvailable,
   shouldQueueForLater,
 } from "@/services/gameRulesService";
 import {
@@ -85,7 +85,7 @@ export function useChat() {
     currentGameState: GameState,
     processedMessageIds: string[] = [],
   ): Promise<boolean> => {
-    if (!canRequestAssistantReply(currentGameState, isTyping)) {
+    if (isTyping || !isJulieAvailable(currentGameState)) {
       return false;
     }
 
