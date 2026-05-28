@@ -8,12 +8,66 @@ import {
   SLEEP_DURATION_MAX_MS,
   SLEEP_DURATION_MIN_MS,
 } from "@/constants/appConstants";
+import { ParsedAIResponse } from "@/types/ParsedAIResponse";
 import { GameState } from "@/types/GameState";
 
-export function pickRandomMessage(messages: string[]) {
-  return messages[Math.floor(Math.random() * messages.length)];
+// Règles de réponse
+export function isJulieAvailable(gameState: GameState | null | undefined) {
+  if (!gameState) {
+    return false;
+  }
+
+  return (
+    gameState.juliePhase !== "asleep" &&
+    gameState.juliePhase !== "busy" &&
+    gameState.juliePhase !== "finalTwist"
+  );
 }
 
+export function buildAssistantStateUpdates(
+  gameState: GameState,
+  parsedResponse: ParsedAIResponse,
+): Partial<GameState> {
+  const nextStress = Math.min(
+    100,
+    Math.max(0, (gameState.iaStress ?? 0) + parsedResponse.stressChange),
+  );
+  const nextTrust = Math.min(
+    100,
+    Math.max(0, (gameState.iaTrust ?? 0) + parsedResponse.trustChange),
+  );
+
+  const updates: Partial<GameState> = {
+    iaStress: nextStress,
+    iaTrust: nextTrust,
+  };
+
+  if (
+    parsedResponse.nextSituation === "leg_freed" &&
+    gameState.julieSituation !== "leg_freed"
+  ) {
+    updates.julieSituation = "leg_freed";
+  }
+
+  if (parsedResponse.durationMinutes > 0) {
+    const now = Date.now();
+    updates.juliePhase = "busy";
+    updates.julieBusyUntil = now + getBusyDurationMs(parsedResponse.durationMinutes);
+    updates.busyReason = parsedResponse.response;
+  }
+
+  return updates;
+}
+
+export function shouldQueueForLater(gameState: GameState) {
+  return gameState.juliePhase === "busy" || gameState.juliePhase === "asleep";
+}
+
+export function hasPendingMessages(gameState: GameState) {
+  return Boolean(gameState.pendingMessageIds?.length);
+}
+
+// Calculs de temps
 export function getRandomSleepDurationMs() {
   return (
     SLEEP_DURATION_MIN_MS +
@@ -41,6 +95,7 @@ export function getBusyDurationMs(durationMinutes: number) {
   return durationMinutes * MINUTE_MS;
 }
 
+// Conditions de transition
 export function shouldTriggerFinalTwist(gameState: GameState, now: number) {
   return Boolean(
     gameState.firstMessageTimestamp &&
@@ -71,6 +126,6 @@ export function shouldStartSleep(gameState: GameState, now: number) {
       gameState.juliePhase === "awake" &&
       gameState.nextSleepAt &&
       now >= gameState.nextSleepAt &&
-      (!gameState.pendingMessageIds || gameState.pendingMessageIds.length === 0),
+      !hasPendingMessages(gameState),
   );
 }

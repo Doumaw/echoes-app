@@ -13,9 +13,25 @@ import { ChatHeader } from "@/components/ChatHeader";
 import { ChatInput } from "@/components/ChatInput";
 import { MessageBubble } from "@/components/MessageBubble";
 import { AppTheme, getTheme } from "@/constants/theme";
-import { useChatController } from "@/hooks/useChatController";
+import { useChat } from "@/hooks/useChat";
 import { useGameState } from "@/hooks/useGameState";
-import { getChatStatus } from "@/services/chatService";
+import { JuliePhase } from "@/types/GameState";
+
+function getChatStatus(juliePhase: JuliePhase | undefined) {
+  if (!juliePhase) {
+    return "Problème de connexion";
+  }
+
+  if (
+    juliePhase === "asleep" ||
+    juliePhase === "busy" ||
+    juliePhase === "finalTwist"
+  ) {
+    return "Hors ligne";
+  }
+
+  return "En ligne";
+}
 
 export default function ChatScreen() {
   const insets = useSafeAreaInsets();
@@ -23,7 +39,7 @@ export default function ChatScreen() {
     messages,
     isTyping,
     handleSend,
-  } = useChatController();
+  } = useChat();
   const { gameState, isGameStateLoading } = useGameState();
 
   const currentTheme = getTheme(gameState?.theme ?? "dark");
@@ -59,7 +75,7 @@ export default function ChatScreen() {
       >
         <FlatList
           data={messages}
-          keyExtractor={(m) => m.id}
+          keyExtractor={(message) => message.id}
           renderItem={({ item }) => (
             <MessageBubble message={item} theme={currentTheme} />
           )}

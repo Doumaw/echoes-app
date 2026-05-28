@@ -28,8 +28,8 @@ export function GameStateProvider({ children }: Props) {
     try {
       const saved = await loadStoredGameState();
       setGameState(saved ?? createInitialGameState());
-    } catch (e) {
-      console.error("Erreur lecture AsyncStorage", e);
+    } catch (error) {
+      console.error("Erreur lecture AsyncStorage", error);
       setGameState(createInitialGameState());
     } finally {
       setIsGameStateLoading(false);
@@ -46,18 +46,18 @@ export function GameStateProvider({ children }: Props) {
       if (nextState) {
         setGameState(nextState);
       }
-    } catch (e) {
-      console.error("Erreur écriture AsyncStorage", e);
+    } catch (error) {
+      console.error("Erreur écriture AsyncStorage", error);
     }
   }, [gameState]);
 
-  const value = useMemo(
+  const contextValue = useMemo(
     () => ({ gameState, isGameStateLoading, loadState, saveGameState }),
     [gameState, isGameStateLoading, loadState, saveGameState],
   );
 
   return (
-    <GameStateContext.Provider value={value}>
+    <GameStateContext.Provider value={contextValue}>
       {children}
     </GameStateContext.Provider>
   );

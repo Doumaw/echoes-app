@@ -67,8 +67,8 @@ export default function SettingsScreen() {
             <Switch
               value={gameState.theme === "dark"}
               trackColor={{ false: currentTheme.colors.switchTrackOff, true: currentTheme.colors.primary }}
-              onValueChange={(value) => {
-                void saveGameState({ theme: value ? "dark" : "light" });
+              onValueChange={(isDarkModeEnabled) => {
+                void saveGameState({ theme: isDarkModeEnabled ? "dark" : "light" });
               }}
             />
           </View>

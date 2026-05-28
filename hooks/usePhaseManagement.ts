@@ -5,20 +5,20 @@ import {
   SLEEP_START_MESSAGES,
 } from "@/constants/appConstants";
 import { createInitialGameState } from "@/services/gameStateService";
-import { clearMessages, insertMessage } from "@/services/messageRepository";
-import { createMessage, createSystemMessages } from "@/services/messageService";
 import {
   getBusyDurationMs,
   getDemoSleepDurationMs,
   getFirstSleepTimestamp,
   getNextSleepTimestamp,
   getRandomSleepDurationMs,
-  pickRandomMessage,
+  hasPendingMessages,
   shouldStartSleep,
   shouldTriggerFinalTwist,
   shouldWakeFromBusy,
   shouldWakeFromSleep,
-} from "@/services/phaseService";
+} from "@/services/gameRulesService";
+import { clearMessages, insertMessage } from "@/services/messageRepository";
+import { createAssistantMessage, createSystemMessages } from "@/services/messageService";
 import { GameState } from "@/types/GameState";
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useEffect, useRef } from "react";
@@ -30,6 +30,12 @@ export function usePhaseManagement(
   const db = useSQLiteContext();
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const addRandomAssistantMessage = useCallback(async (texts: string[]) => {
+    const text = texts[Math.floor(Math.random() * texts.length)];
+    await insertMessage(db, createAssistantMessage(text));
+  }, [db]);
+
+  // Actions forcées
   const triggerFinalTwist = useCallback(async () => {
     await saveGameState({
       juliePhase: "finalTwist",
@@ -50,9 +56,7 @@ export function usePhaseManagement(
   }, [db, saveGameState]);
 
   const forceAwake = useCallback(async () => {
-    const hasPendingMessages = Boolean(
-      gameState?.pendingMessageIds && gameState.pendingMessageIds.length > 0,
-    );
+    const shouldSkipReturnMessage = gameState ? hasPendingMessages(gameState) : false;
 
     await saveGameState({
       juliePhase: "awake",
@@ -62,23 +66,15 @@ export function usePhaseManagement(
       busyReason: undefined,
     });
 
-    if (!hasPendingMessages) {
-      await insertMessage(db, createMessage(
-        pickRandomMessage(BUSY_RETURN_MESSAGES),
-        false,
-        1,
-      ));
+    if (!shouldSkipReturnMessage) {
+      await addRandomAssistantMessage(BUSY_RETURN_MESSAGES);
     }
-  }, [db, gameState?.pendingMessageIds, saveGameState]);
+  }, [addRandomAssistantMessage, gameState?.pendingMessageIds, saveGameState]);
 
   const forceSleep = useCallback(async () => {
     const now = Date.now();
     const forcedSleepDurationMs = getDemoSleepDurationMs();
-    await insertMessage(db, createMessage(
-      pickRandomMessage(SLEEP_START_MESSAGES),
-      false,
-      1,
-    ));
+    await addRandomAssistantMessage(SLEEP_START_MESSAGES);
     await saveGameState({
       juliePhase: "asleep",
       julieWakeUpTime: now + forcedSleepDurationMs,
@@ -86,7 +82,7 @@ export function usePhaseManagement(
       julieBusyUntil: undefined,
       busyReason: undefined,
     });
-  }, [db, saveGameState]);
+  }, [addRandomAssistantMessage, saveGameState]);
 
   const setBusy = useCallback(
     async (durationMinutes: number, reason?: string) => {
@@ -105,6 +101,7 @@ export function usePhaseManagement(
     [gameState, saveGameState],
   );
 
+  // Transitions automatiques
   const checkPhaseTransitions = useCallback(async () => {
     if (!gameState) return;
 
@@ -123,12 +120,8 @@ export function usePhaseManagement(
         busyReason: undefined,
       });
 
-      if (!gameState.pendingMessageIds || gameState.pendingMessageIds.length === 0) {
-        await insertMessage(db, createMessage(
-          pickRandomMessage(BUSY_RETURN_MESSAGES),
-          false,
-          1,
-        ));
+      if (!hasPendingMessages(gameState)) {
+        await addRandomAssistantMessage(BUSY_RETURN_MESSAGES);
       }
 
       return;
@@ -141,12 +134,8 @@ export function usePhaseManagement(
         nextSleepAt: getNextSleepTimestamp(now),
       });
 
-      if (!gameState.pendingMessageIds || gameState.pendingMessageIds.length === 0) {
-        await insertMessage(db, createMessage(
-          pickRandomMessage(SLEEP_END_MESSAGES),
-          false,
-          1,
-        ));
+      if (!hasPendingMessages(gameState)) {
+        await addRandomAssistantMessage(SLEEP_END_MESSAGES);
       }
 
       return;
@@ -167,11 +156,7 @@ export function usePhaseManagement(
 
     if (shouldStartSleep(gameState, now)) {
       const wakeUpTime = now + getRandomSleepDurationMs();
-      await insertMessage(db, createMessage(
-        pickRandomMessage(SLEEP_START_MESSAGES),
-        false,
-        1,
-      ));
+      await addRandomAssistantMessage(SLEEP_START_MESSAGES);
 
       await saveGameState({
         juliePhase: "asleep",
@@ -180,8 +165,9 @@ export function usePhaseManagement(
       });
       return;
     }
-  }, [db, gameState, saveGameState, triggerFinalTwist]);
+  }, [addRandomAssistantMessage, gameState, saveGameState, triggerFinalTwist]);
 
+  // Minuteur de vérification
   useEffect(() => {
     checkPhaseTransitions();
 

@@ -31,3 +31,7 @@ export function createSystemMessages(texts: string[]): Message[] {
     isIaRead: 1,
   }));
 }
+
+export function createAssistantMessage(text: string): Message {
+  return createMessage(text, false, 1);
+}

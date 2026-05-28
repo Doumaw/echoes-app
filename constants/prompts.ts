@@ -6,7 +6,7 @@ export const getJuliePrompt = (gameState: GameState, history: Message[]) => {
   const lastMessages = [...history]
     .slice(0, 15)
     .reverse()
-    .map(msg => `${msg.isUser === 1 ? "Joueur" : "Julie"}: ${msg.text}`)
+    .map((message) => `${message.isUser === 1 ? "Joueur" : "Julie"}: ${message.text}`)
     .join("\n");
 
   const situationText =

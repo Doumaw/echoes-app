@@ -4,10 +4,10 @@ import { SQLiteDatabase } from "expo-sqlite";
 export async function migrateDbIfNeeded(db: SQLiteDatabase) {
   await db.execAsync(`PRAGMA journal_mode = 'wal';`);
 
-  const result = await db.getFirstAsync<{ user_version: number }>(
+  const versionRow = await db.getFirstAsync<{ user_version: number }>(
     "PRAGMA user_version",
   );
-  const currentDbVersion = result?.user_version ?? 0;
+  const currentDbVersion = versionRow?.user_version ?? 0;
 
   if (currentDbVersion === 0) {
     await db.execAsync(`

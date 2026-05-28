@@ -9,12 +9,12 @@ export const aiService = {
   async getResponse(history: Message[], gameState: GameState) {
     if (!API_KEY) throw new Error("API Key manquante dans le .env");
 
-    const formattedHistory = [...history].reverse().map((msg) => ({
-      role: msg.isUser ? "user" : "assistant",
-      content: msg.text,
+    const formattedHistory = [...history].reverse().map((message) => ({
+      role: message.isUser ? "user" : "assistant",
+      content: message.text,
     }));
 
-      const response = await fetch(AI_API_URL, {
+    const httpResponse = await fetch(AI_API_URL, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${API_KEY}`,
@@ -23,7 +23,7 @@ export const aiService = {
         "X-Title": "Echoes Game",
       },
       body: JSON.stringify({
-          model: AI_MODEL,
+        model: AI_MODEL,
         messages: [
           { role: "system", content: getJuliePrompt(gameState, history) },
           ...formattedHistory,
@@ -31,13 +31,13 @@ export const aiService = {
       }),
     });
 
-    if (!response.ok) {
-      throw new Error(`API_ERROR: ${response.status}`);
+    if (!httpResponse.ok) {
+      throw new Error(`API_ERROR: ${httpResponse.status}`);
     }
 
-    const data = await response.json();
+    const responseBody = await httpResponse.json();
     return (
-      data.choices?.[0]?.message?.content ||
+      responseBody.choices?.[0]?.message?.content ||
       "Tu es la??? Je ne reçois aucun message..."
     );
   },
