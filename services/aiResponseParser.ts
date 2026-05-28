@@ -4,88 +4,109 @@ import {
 } from "@/constants/appConstants";
 import { ParsedAIResponse } from "@/types/ParsedAIResponse";
 
+interface AIResponsePayload {
+  stress_change: number;
+  trust_change: number;
+  response: string;
+  duration_minutes: number;
+  next_situation?: unknown;
+}
+
 // Validation du contrat IA
-function isAllowedDuration(value: number) {
+function isAllowedDuration(durationMinutes: number) {
   return ALLOWED_AI_DURATIONS.includes(
-    value as (typeof ALLOWED_AI_DURATIONS)[number],
+    durationMinutes as (typeof ALLOWED_AI_DURATIONS)[number],
   );
 }
 
-function isAllowedNextSituation(value: unknown) {
+function isAllowedNextSituation(nextSituation: unknown) {
   return ALLOWED_AI_NEXT_SITUATIONS.includes(
-    value as (typeof ALLOWED_AI_NEXT_SITUATIONS)[number],
+    nextSituation as (typeof ALLOWED_AI_NEXT_SITUATIONS)[number],
   );
+}
+
+function isAIResponsePayload(payload: unknown): payload is AIResponsePayload {
+  return (
+    typeof payload === "object" &&
+    payload !== null &&
+    typeof (payload as { stress_change?: unknown }).stress_change === "number" &&
+    typeof (payload as { trust_change?: unknown }).trust_change === "number" &&
+    typeof (payload as { response?: unknown }).response === "string" &&
+    typeof (payload as { duration_minutes?: unknown }).duration_minutes === "number"
+  );
+}
+
+function tryParseJson(jsonText: string) {
+  try {
+    return JSON.parse(jsonText);
+  } catch {
+    return undefined;
+  }
 }
 
 // Extraction JSON
-function parseJsonPayload(raw: unknown) {
-  if (typeof raw !== "string") {
-    return raw;
+function extractJsonPayload(rawAIResponse: unknown) {
+  if (typeof rawAIResponse !== "string") {
+    return rawAIResponse;
   }
 
-  // On tente de parser directement
-  try {
-    return JSON.parse(raw);
-  } 
-  catch {
+  const directPayload = tryParseJson(rawAIResponse);
+  if (directPayload !== undefined) {
+    return directPayload;
   }
 
-  // On nettoie les markdown et on retente de parser
-  const withoutMarkdown = raw
+  // On retente avec un texte nettoyé.
+  const withoutMarkdown = rawAIResponse
     .replace(/^```json\s*/i, "")
     .replace(/^```\s*/i, "")
     .replace(/```\s*$/i, "")
     .trim();
 
-  try {
-    return JSON.parse(withoutMarkdown);
-  } catch {
+  const markdownPayload = tryParseJson(withoutMarkdown);
+  if (markdownPayload !== undefined) {
+    return markdownPayload;
   }
 
-  // On tentre une 3e fois en cherchant a isoler un texte entre {} qui serait le JSON
-  const jsonStart = raw.indexOf("{");
-  const jsonEnd = raw.lastIndexOf("}");
+  // On retente en isolant le JSON entre accolades.
+  const jsonStart = rawAIResponse.indexOf("{");
+  const jsonEnd = rawAIResponse.lastIndexOf("}");
 
   if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
-    return JSON.parse(raw.slice(jsonStart, jsonEnd + 1));
+    const isolatedPayload = tryParseJson(rawAIResponse.slice(jsonStart, jsonEnd + 1));
+
+    if (isolatedPayload !== undefined) {
+      return isolatedPayload;
+    }
   }
 
   throw new Error("JSON IA introuvable");
 }
 
 // Conversion en réponse utilisable par le jeu
-export function parseAIResponse(raw: unknown): ParsedAIResponse {
-  const payload = parseJsonPayload(raw);
-  const nextSituation = (payload as { next_situation?: unknown })?.next_situation ?? null;
+export function parseAIResponse(rawAIResponse: unknown): ParsedAIResponse {
+  const payload = extractJsonPayload(rawAIResponse);
 
-  if ( // Si un seul est faux on throw
-    typeof payload !== "object" ||
-    payload === null || // Car typeof null est "object" en JS
-    typeof (payload as { stress_change?: unknown }).stress_change !== "number" ||
-    typeof (payload as { trust_change?: unknown }).trust_change !== "number" ||
-    typeof (payload as { response?: unknown }).response !== "string" ||
-    typeof (payload as { duration_minutes?: unknown }).duration_minutes !== "number"
-  ) {
+  // Si un champ obligatoire manque ou a un mauvais type, la réponse est invalide.
+  if (!isAIResponsePayload(payload)) {
     throw new Error("Format inattendu");
   }
 
-  if (!isAllowedDuration((payload as { duration_minutes: number }).duration_minutes)) {
-    throw new Error(
-      `Durée invalide: ${(payload as { duration_minutes: number }).duration_minutes}`,
-    );
+  const nextSituation = payload.next_situation ?? null;
+
+  if (!isAllowedDuration(payload.duration_minutes)) {
+    throw new Error(`Durée invalide: ${payload.duration_minutes}`);
   }
 
-  if (
-    !isAllowedNextSituation(nextSituation)
-  ) {
+  if (!isAllowedNextSituation(nextSituation)) {
     throw new Error(`Situation invalide: ${String(nextSituation)}`);
   }
 
-  return { // On map les propriétés du payload vers le format attendu par le jeu
-    stressChange: (payload as { stress_change: number }).stress_change,
-    trustChange: (payload as { trust_change: number }).trust_change,
-    response: (payload as { response: string }).response,
-    durationMinutes: (payload as { duration_minutes: number }).duration_minutes,
+  // Conversion du format IA vers le format interne du jeu.
+  return {
+    stressChange: payload.stress_change,
+    trustChange: payload.trust_change,
+    response: payload.response,
+    durationMinutes: payload.duration_minutes,
     nextSituation: nextSituation as "leg_freed" | null,
   };
 }

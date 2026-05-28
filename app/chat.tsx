@@ -75,7 +75,7 @@ export default function ChatScreen() {
       >
         <FlatList
           data={messages}
-          keyExtractor={(m) => m.id}
+          keyExtractor={(message) => message.id}
           renderItem={({ item }) => (
             <MessageBubble message={item} theme={currentTheme} />
           )}

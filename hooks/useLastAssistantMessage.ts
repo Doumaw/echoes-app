@@ -9,8 +9,8 @@ export function useLastAssistantMessage() {
 
   const loadLastMessage = useCallback(async () => {
     try {
-      const result = await getLastAssistantMessage(db);
-      setLastMessage(result ?? null);
+      const storedLastMessage = await getLastAssistantMessage(db);
+      setLastMessage(storedLastMessage ?? null);
     } catch (error) {
       console.error("Erreur lecture dernier message", error);
     }

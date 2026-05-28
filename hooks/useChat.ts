@@ -32,12 +32,12 @@ export function useChat() {
 
   // Messages
   const loadMessages = useCallback(async () => {
-    const result = await getAllMessages(db);
-    setMessages(result);
+    const storedMessages = await getAllMessages(db);
+    setMessages(storedMessages);
   }, [db]);
 
-  const addMessage = useCallback(async (text: string, isUser: boolean, isIaRead: number = isUser ? 0 : 1) => {
-    const newMessage = createMessage(text, isUser, isIaRead);
+  const addMessage = useCallback(async (messageText: string, isUser: boolean, isIaRead: number = isUser ? 0 : 1) => {
+    const newMessage = createMessage(messageText, isUser, isIaRead);
     await insertMessage(db, newMessage);
     setMessages((prev) => [newMessage, ...prev]);
     return newMessage;
@@ -55,8 +55,8 @@ export function useChat() {
   }, [db, loadMessages]);
 
   const addAssistantFallbackMessage = useCallback(
-    async (text: string) => {
-      await addMessage(text, false, 1);
+    async (messageText: string) => {
+      await addMessage(messageText, false, 1);
     },
     [addMessage],
   );
@@ -103,8 +103,8 @@ export function useChat() {
         await markAsIaReadAndRefresh(processedMessageIds);
         return true;
       }
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error(error);
       await addAssistantFallbackMessage(
         "Le signal est trop faible, je ne reçois rien...",
       );
@@ -148,8 +148,8 @@ export function useChat() {
   }, [db, requestAssistantReply, saveGameState]);
 
   // Commandes de démonstration
-  const handleDemoCommandIfNeeded = useCallback(async (text: string) => {
-    const demoCommandAction = getDemoCommandAction(text);
+  const handleDemoCommandIfNeeded = useCallback(async (messageText: string) => {
+    const demoCommandAction = getDemoCommandAction(messageText);
 
     if (demoCommandAction === "twist") {
       await triggerFinalTwist();
@@ -212,14 +212,14 @@ export function useChat() {
   }, [gameState?.juliePhase, gameState?.pendingMessageIds, loadMessages]);
 
   // Action publique
-  const handleSend = useCallback(async (text: string) => {
+  const handleSend = useCallback(async (messageText: string) => {
     if (!gameState) return;
 
-    if (await handleDemoCommandIfNeeded(text)) {
+    if (await handleDemoCommandIfNeeded(messageText)) {
       return;
     }
 
-    const userMessage = await addMessage(text, true, 0);
+    const userMessage = await addMessage(messageText, true, 0);
 
     if (isTyping || shouldQueueForLater(gameState)) {
       const currentPending = gameState.pendingMessageIds || [];
