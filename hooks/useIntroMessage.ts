@@ -1,12 +1,15 @@
+import { FIRST_IA_MESSAGE } from "@/constants/appConstants";
 import { useGameState } from "@/hooks/useGameState";
-import { useMessages } from "@/hooks/useMessages";
+import { insertMessage } from "@/services/messageRepository";
+import { createMessage } from "@/services/messageService";
 import { useFocusEffect } from "expo-router";
+import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useRef } from "react";
 
 export function useIntroMessage(loadLastMessage: () => Promise<void>) {
+  const db = useSQLiteContext();
   const introStartedRef = useRef(false);
   const { gameState, saveGameState, isGameStateLoading } = useGameState();
-  const { isTyping, sendFirstSOS } = useMessages();
 
   const runIntroIfNeeded = useCallback(async () => {
     if (gameState?.hasSeenIntro) {
@@ -17,7 +20,6 @@ export function useIntroMessage(loadLastMessage: () => Promise<void>) {
     if (
       isGameStateLoading ||
       !gameState ||
-      isTyping ||
       introStartedRef.current
     ) {
       return;
@@ -31,15 +33,14 @@ export function useIntroMessage(loadLastMessage: () => Promise<void>) {
       firstMessageTimestamp,
     });
 
-    await sendFirstSOS();
+    await insertMessage(db, createMessage(FIRST_IA_MESSAGE, false, 1));
     await loadLastMessage();
   }, [
+    db,
     gameState,
     isGameStateLoading,
-    isTyping,
     loadLastMessage,
     saveGameState,
-    sendFirstSOS,
   ]);
 
   useFocusEffect(

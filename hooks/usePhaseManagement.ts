@@ -5,8 +5,6 @@ import {
   SLEEP_START_MESSAGES,
 } from "@/constants/appConstants";
 import { createInitialGameState } from "@/services/gameStateService";
-import { clearMessages, insertMessage } from "@/services/messageRepository";
-import { createMessage, createSystemMessages } from "@/services/messageService";
 import {
   getBusyDurationMs,
   getDemoSleepDurationMs,
@@ -18,7 +16,9 @@ import {
   shouldTriggerFinalTwist,
   shouldWakeFromBusy,
   shouldWakeFromSleep,
-} from "@/services/phaseService";
+} from "@/services/gameRulesService";
+import { clearMessages, insertMessage } from "@/services/messageRepository";
+import { createMessage, createSystemMessages } from "@/services/messageService";
 import { GameState } from "@/types/GameState";
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useEffect, useRef } from "react";
