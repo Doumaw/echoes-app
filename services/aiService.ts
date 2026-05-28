@@ -14,7 +14,7 @@ export const aiService = {
       content: msg.text,
     }));
 
-      const response = await fetch(AI_API_URL, {
+    const response = await fetch(AI_API_URL, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${API_KEY}`,
@@ -23,7 +23,7 @@ export const aiService = {
         "X-Title": "Echoes Game",
       },
       body: JSON.stringify({
-          model: AI_MODEL,
+        model: AI_MODEL,
         messages: [
           { role: "system", content: getJuliePrompt(gameState, history) },
           ...formattedHistory,

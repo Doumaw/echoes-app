@@ -98,20 +98,22 @@ export function useChat() {
       } catch (parseErr) {
         console.error("Erreur parsing JSON IA:", parseErr);
         await addAssistantFallbackMessage(
-          "Julie a marmonné dans sa barbe... (réponse illisible)",
+          "je capte mal... ton dernier message s'est affiché n'importe comment... tu peux répéter ?",
         );
-        return false;
+        await markAsIaReadAndRefresh(processedMessageIds);
+        return true;
       }
     } catch (e) {
       console.error(e);
       await addAssistantFallbackMessage(
         "Le signal est trop faible, je ne reçois rien...",
       );
-      return false;
+      await markAsIaReadAndRefresh(processedMessageIds);
+      return true;
     } finally {
       setIsTyping(false);
     }
-  }, [addAssistantFallbackMessage, applyAssistantResponse, isTyping]);
+  }, [addAssistantFallbackMessage, applyAssistantResponse, isTyping, markAsIaReadAndRefresh]);
 
   // Messages en attente
   const processPendingMessages = useCallback(async (

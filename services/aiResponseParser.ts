@@ -81,7 +81,7 @@ export function parseAIResponse(raw: unknown): ParsedAIResponse {
     throw new Error(`Situation invalide: ${String(nextSituation)}`);
   }
 
-  return {
+  return { // On map les propriétés du payload vers le format attendu par le jeu
     stressChange: (payload as { stress_change: number }).stress_change,
     trustChange: (payload as { trust_change: number }).trust_change,
     response: (payload as { response: string }).response,
